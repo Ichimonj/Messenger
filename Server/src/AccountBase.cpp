@@ -15,7 +15,9 @@ void AccountBase::erase(uint64_t ID)
 userPtr AccountBase::findUser(uint64_t ID)
 {
     abDEBUG_LOG("DEBUG_Account_base", "findUser(uint64_t ID)");
-    return user_base.find(ID)->second;
+    auto account = user_base.find(ID);
+    if (account == user_base.end()) { return nullptr; }
+    return account->second;
 }
 
 void AccountBase::print()
