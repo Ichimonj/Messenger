@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(server VERSION 0.6.0)
+project(server VERSION 0.7.0)
 
 
 set(project_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})

@@ -24,7 +24,6 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
 {
     afDEBUG_LOG("DEBUG_account_factory", "make_temp_account");
 
-
     char buf[1024];
 
     size_t lenght = socket->read_some(asio::buffer(buf), ec);
@@ -87,9 +86,8 @@ void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, err
     lenght = socket->read_some(asio::buffer(buf), ec);
     if (ec) { return; }
     string _password(buf, lenght);
-    cout << user->getPassword() << endl;
+
     if (user->getPassword() == _password) {
-        user->login(socket);
+        if (user->login(socket) == 1) { ERROR_LOG("DEBUG_account_factory", "account is already taken"); }
     }
-    afDEBUG_LOG("DEBUG_account_factory", "end login");
 }

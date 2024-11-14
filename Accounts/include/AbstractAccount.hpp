@@ -32,7 +32,7 @@ public:
 	virtual void print() 	const;
 	virtual void info() 	const;
 
-	void login(shared_ptr<asio::ip::tcp::socket> socket);
+	uint8_t login(shared_ptr<asio::ip::tcp::socket> socket);
 public:
 	friend ostream &operator<<(ostream &os, const Account &ex);
 	bool operator<(const Account &ex);

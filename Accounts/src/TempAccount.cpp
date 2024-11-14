@@ -29,6 +29,7 @@ void TempAccount::reading()
             }
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
+                socket_->close();
             }
         });
 }
