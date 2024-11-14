@@ -31,6 +31,13 @@ void Account::info() const
     cout << "\033[0m";
 }
 
+void Account::login(shared_ptr<asio::ip::tcp::socket> socket)
+{
+    acDEBUG_LOG("DEBUG_Virtual_account", "login");
+    this->socket_ = socket;
+    reading();
+}
+
 ostream &operator<<(ostream &os, const Account &ex)
 {
     cout << "\033[38;5;250;48;5;22m";
