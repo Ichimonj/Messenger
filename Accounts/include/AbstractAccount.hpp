@@ -26,6 +26,7 @@ public:
 	const uint64_t 	getId() 		const;
 	const string 	getUserName() 	const;
 	const status 	getStatus() 	const;
+	const string	getPassword()	const;
 
 	virtual void reading() 	= 0;
 	virtual void print() 	const;
