@@ -37,6 +37,7 @@ uint8_t Account::login(shared_ptr<asio::ip::tcp::socket> socket)
     if (socket_->is_open()) { return 1; }
     this->socket_ = socket;
     reading();
+    this->status_ = online;
     return 0;
 }
 

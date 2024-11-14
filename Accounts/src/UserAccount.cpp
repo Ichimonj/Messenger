@@ -31,6 +31,7 @@ void UserAccount::reading()
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
                 socket_->close();
+                this->status_ = offline;
             }
         });
 }

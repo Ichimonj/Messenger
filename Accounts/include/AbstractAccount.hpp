@@ -40,10 +40,10 @@ public:
 protected:
 	shared_ptr<asio::ip::tcp::socket> socket_;
 	char buf[1024];
+	status 			status_ = online;
 
 private:
 	const uint64_t 	ID_;
 	string 			userName_ = "NULL";
 	string			password_ = "NULL";
-	status 			status_ = online;
 };
