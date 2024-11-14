@@ -1,2 +1,5 @@
 .vscode
 Benchmark
+Server.vcxproj
+Server.vcxproj.filters
+Server.vcxproj.user
