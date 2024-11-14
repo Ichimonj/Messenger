@@ -1,7 +1,7 @@
 #include "TempAccount.hpp"
 
-TempAccount::TempAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string &userName)
-    : Account(socket, ID, userName)
+TempAccount::TempAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string& userName, const string& password)
+    : Account(socket, ID, userName, password)
 {
     acDEBUG_LOG("DEBUG_Temp_account", "TempAccount(const uint64_t ID, const string userName)");
     reading();

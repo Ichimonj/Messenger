@@ -20,13 +20,18 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
 {
     afDEBUG_LOG("DEBUG_account_factory", "make_temp_account");
 
+
     char buf[1024];
 
-    size_t lenght = socket->read_some(asio::buffer(buf),ec);
-    if (ec) { return ; }
+    size_t lenght = socket->read_some(asio::buffer(buf), ec);
+    if (ec) { return; }
     string _userName(buf, lenght);
 
-    accountBase.insert(make_shared<TempAccount>(socket, ID, _userName));
+    lenght = socket->read_some(asio::buffer(buf), ec);
+    if (ec) { return; }
+    string _password(buf, lenght);
+
+    accountBase.insert(make_shared<TempAccount>(socket, ID, _userName,_password));
 }
 
 void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket, uint64_t ID, error_code &ec)

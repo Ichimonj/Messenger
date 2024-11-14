@@ -1,7 +1,7 @@
 #include "UserAccount.hpp"
 
 UserAccount::UserAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string &userName, const string &password, const string &emale, const PhoneNumber &phoneNumber)
-    : Account(socket, ID, userName), password_(password), emale_(emale), phoneNumber_(phoneNumber)
+    : Account(socket, ID, userName, password), emale_(emale), phoneNumber_(phoneNumber)
 {
     acDEBUG_LOG("DEBUG_User_account", "UserAccount(const uint64_t ID, const string& userName, const string& password, const string& emale, const PhoneNumber& phoneNumber)");
     reading();
@@ -49,7 +49,6 @@ void UserAccount::info() const
 
 ostream &operator<<(ostream &os, const UserAccount &ex)
 {
-    os << setw(16) << left << setfill('.') << "Password" << ex.password_ << '\n';
     os << setw(16) << left << setfill('.') << "Emale" << ex.emale_ << '\n';
     os << setw(16) << left << setfill('.') << "Phone number" << ex.phoneNumber_;
     os << "\033[0m\n";

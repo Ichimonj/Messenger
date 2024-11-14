@@ -1,12 +1,12 @@
 #include "AbstractAccount.hpp"
 
-Account::Account(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string &userName)
-    : socket_(move(socket)), ID_(ID), userName_(userName), status_(online)
+Account::Account(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string &userName,const string& password)
+    : socket_(move(socket)), ID_(ID), userName_(userName),password_(password), status_(online)
 {
     acDEBUG_LOG("DEBUG_Virtual_account", "Account(const uint64_t ID, const string userName)");
 }
 Account::Account(Account &&other) noexcept
-    : socket_(move(other.socket_)), ID_(other.ID_), userName_(move(other.userName_)), status_(other.status_)
+    : socket_(move(other.socket_)), ID_(other.ID_), userName_(move(other.userName_)),password_(move(other.password_)), status_(other.status_)
 {
     acDEBUG_LOG("DEBUG_Virtual_account", "Account(Account&& other)");
 }
@@ -33,8 +33,9 @@ void Account::info() const
 ostream &operator<<(ostream &os, const Account &ex)
 {
     cout << "\033[38;5;250;48;5;22m";
-    os << setw(16) << left << setfill('.') << "ID" << ex.ID_ << '\n';
-    os << setw(16) << left << setfill('.') << "User name" << ex.userName_ << '\n';
+    os << setw(16) << left << setfill('.') << "ID"          << ex.ID_       << '\n';
+    os << setw(16) << left << setfill('.') << "User name"   << ex.userName_ << '\n';
+    os << setw(16) << left << setfill('.') << "Password"    << ex.password_ << '\n';
     os << setw(16) << left << setfill('.') << "Status";
     switch (ex.status_)
     {
