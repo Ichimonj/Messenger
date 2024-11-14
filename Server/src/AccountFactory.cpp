@@ -2,7 +2,7 @@
 
 //important: version without encryption and hashing
 uint64_t AccountFactory::count = 0;
-
+vector<uint64_t> AccountFactory::free_id{};
 void AccountFactory::make_account(shared_ptr<asio::ip::tcp::socket> socket)
 {
     afDEBUG_LOG("DEBUG_account_factory", "make_account");
@@ -14,15 +14,15 @@ void AccountFactory::make_account(shared_ptr<asio::ip::tcp::socket> socket)
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
     else    { type = string(_type, length); }
 
-    if      (type == "temp")    { make_temp_account(socket, count, ec); }
-    else if (type == "no_temp") { make_user_account(socket, count, ec); }
+    if      (type == "temp")    { make_temp_account(socket, ec); }
+    else if (type == "no_temp") { make_user_account(socket, ec); }
     else if (type == "login")   { login_account    (socket, ec); }
     else    { EXCEPTIONS_LOG("Account_factory", "undefined connection type"); return; }
 }
 
-void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket, uint64_t ID, error_code &ec)
+void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket, error_code& ec)
 {
-    afDEBUG_LOG("DEBUG_account_factory", string("make_temp_account ID - "+to_string(ID)));
+    afDEBUG_LOG("DEBUG_account_factory", "make_temp_account");
 
     char buf[1024];
 
@@ -34,15 +34,20 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
     string _password(buf, lenght);
 
+    uint64_t ID;
+    if (free_id.empty()) { ID = count++; }
+    else {
+        ID = free_id.back();
+        free_id.pop_back();
+    }
     accountBase.insert(make_shared<TempAccount>(socket, ID, _userName,_password));
-    count++;
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation temp account ID - "+to_string(ID)));
 }
 
-void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket, uint64_t ID, error_code &ec)
+void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket, error_code &ec)
 {
-    afDEBUG_LOG("DEBUG_account_factory", string("make_temp_account ID - " + to_string(ID)));
+    afDEBUG_LOG("DEBUG_account_factory", "make_temp_account");
 
     char buf[1024];
 
@@ -63,8 +68,13 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
 
     PhoneNumber _phoneNumber(string(buf, lenght));
 
+    uint64_t ID;
+    if (free_id.empty()) { ID = count++; }
+    else {
+        ID = free_id.back();
+        free_id.pop_back();
+    }
     accountBase.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _emale, _phoneNumber));
-    count++;
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation user account ID - " + to_string(ID)));
 }

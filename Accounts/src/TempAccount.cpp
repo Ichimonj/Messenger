@@ -29,7 +29,8 @@ void TempAccount::reading()
             }
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
-                socket_->close();
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
             }
         });
 }
