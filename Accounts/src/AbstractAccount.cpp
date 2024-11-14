@@ -18,8 +18,8 @@ Account::~Account()
 
 const uint64_t Account::getId()     const { return this->ID_; }
 const string Account::getUserName() const { return this->userName_; }
-const status Account::getStatus()   const { return this->status_; }
 const string Account::getPassword() const { return this->password_; }
+const status Account::getStatus()   const { return this->status_; }
 
 void Account::print() const { cout << *this; }
 

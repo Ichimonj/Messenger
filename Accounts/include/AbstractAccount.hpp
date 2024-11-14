@@ -25,8 +25,8 @@ public:
 public:
 	const uint64_t 	getId() 		const;
 	const string 	getUserName() 	const;
-	const status 	getStatus() 	const;
 	const string	getPassword()	const;
+	const status 	getStatus() 	const;
 
 	virtual void reading() 	= 0;
 	virtual void print() 	const;
@@ -38,12 +38,11 @@ public:
 	bool operator<(const Account &ex);
 
 protected:
-	shared_ptr<asio::ip::tcp::socket> socket_;
 	char buf[1024];
-	status 			status_ = online;
 
-private:
+	shared_ptr<asio::ip::tcp::socket> socket_;
 	const uint64_t 	ID_;
 	string 			userName_ = "NULL";
 	string			password_ = "NULL";
+	status 			status_ = online;
 };
