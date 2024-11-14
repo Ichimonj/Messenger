@@ -10,7 +10,7 @@ public:
     AccountBase()   { abDEBUG_LOG("DEBUG_Account_base", "AccountBase()") };
     ~AccountBase()  { abDEBUG_LOG("DEBUG_Account_base", "~AccountBase()") };
 
-    void insert(userPtr& user);
+    void insert(userPtr&& user);
     void erase(uint64_t ID);
     userPtr findUser(uint64_t ID);
 
@@ -19,3 +19,4 @@ public:
 private:
     userSet user_base;
 };
+extern AccountBase accountBase;

@@ -1,5 +1,5 @@
 #include "Server.hpp"
-
+#include "AccountBase.hpp"
 Server::Server(shared_ptr<asio::io_context> context) : context_(context),count(0)
 {
     svDEBUG_LOG("DEBUG_Server", "Server(shared_ptr<asio::io_context> context)");
@@ -27,7 +27,7 @@ void Server::start_accept()
             }
             else
             {
-                ERROR_LOG("Accept error: ", ec.message());
+                ERROR_LOG("Accept error: ", ec.message());   
             }
             start_accept();
         });
@@ -37,11 +37,5 @@ void Server::add_client(shared_ptr<asio::ip::tcp::socket> socket)
 {
     svDEBUG_LOG("DEBUG_Server", "add_client(shared_ptr<asio::ip::tcp::socket> socket)");
     count += 1;
-    userPtr newUser = AccountFactory::make_account(socket, count);
-    if (newUser != nullptr) {
-        accountBase.insert(newUser);
-    }
-    else {
-        ERROR_LOG("DEBUG_Server", "AccountFactory rerutn nullptr");
-    }
+    AccountFactory::make_account(socket, count);
 }

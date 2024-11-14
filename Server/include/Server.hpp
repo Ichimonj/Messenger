@@ -21,7 +21,6 @@ private:
     void add_client(shared_ptr<asio::ip::tcp::socket> socket);
 private:
     uint64_t count;
-    AccountBase accountBase;
     shared_ptr<asio::io_context> context_;
     shared_ptr<asio::ip::tcp::acceptor> acceptor_;
 };

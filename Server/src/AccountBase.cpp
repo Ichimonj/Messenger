@@ -1,6 +1,6 @@
 #include "AccountBase.hpp"
 
-void AccountBase::insert(userPtr& user)
+void AccountBase::insert(userPtr&& user)
 {
     abDEBUG_LOG("DEBUG_Account_base", "insert(userPtr &user)");
     user_base.insert({ user->getId(), user });
@@ -27,3 +27,4 @@ void AccountBase::print()
         user.second->print();
     }
 }
+AccountBase accountBase;
