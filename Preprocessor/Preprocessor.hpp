@@ -11,7 +11,8 @@ using namespace std;
 #define SERVER_DEBUG			true	// print debugging information in class server
 #define ACCOUNT_FACTORY_DEBUG	true	// print debugging information in class accounts factory
 #define ERROR_DEBUG				true    // print error	   information in all classes
-#define USER_MESSAGE_DEBUG		true	//print user message
+#define USER_MESSAGE_DEBUG		true	// print user message
+#define EXCEPTIONS_DEBUG		true	// print exceotuions in all classes
 
 #define FILL 25
 
@@ -81,6 +82,18 @@ using namespace std;
 #else
 #define ERROR_LOG(debug_setup, msg)
 #endif // _DEBUG
+
+//========EXCEPTIONS========
+#ifdef _DEBUG
+#if (EXCEPTIONS_DEBUG == true)
+#define EXCEPTIONS_LOG(debug_setup, msg)  clog << "\033[38;5;253;48;5;52m" << setw(FILL) << left << setfill('.') << debug_setup << msg << "\033[0m" << endl;
+#else
+#define EXCEPTIONS_LOG(debug_setup, msg)
+#endif // PHONE_NUMBER_DEBUG
+#else
+#define EXCEPTIONS_LOG(debug_setup, msg)
+#endif // _DEBUG
+
 
 //========User message========
 #ifdef _DEBUG
