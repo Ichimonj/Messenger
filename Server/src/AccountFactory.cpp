@@ -104,6 +104,7 @@ void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, err
     if (ec) { EXCEPTIONS_LOG("Account_factory - ", ec.message()); return; }
 
     string _password(buf, lenght);
+    _password = Hash(_password);
 
     if (user->getPassword() == _password) {
         if (user->login(socket) == 1) { EXCEPTIONS_LOG("Account_factory", "account is already taken"); }
