@@ -33,6 +33,7 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     lenght = socket->read_some(asio::buffer(buf), ec);
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
     string _password(buf, lenght);
+    _password = Hash(_password);
 
     uint64_t ID;
     if (free_id.empty()) { ID = count++; }
@@ -58,6 +59,7 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
     lenght = socket->read_some(asio::buffer(buf),ec);
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
     string _password(buf, lenght);
+    _password = Hash(_password);
 
     lenght = socket->read_some(asio::buffer(buf),ec);
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }

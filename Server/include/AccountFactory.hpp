@@ -1,6 +1,7 @@
 #pragma once
 #include"Accounts.hpp"
 #include"AccountBase.hpp"
+#include"Hash.hpp"
 
 class AccountFactory
 {
