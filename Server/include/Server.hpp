@@ -6,6 +6,7 @@
 #include "AccountBase.hpp"
 using namespace std;
 
+//CLASS RESPONSIBLE FOR CONNECTING CLIENTS
 class Server
 {
 public:

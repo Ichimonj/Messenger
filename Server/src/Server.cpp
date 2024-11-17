@@ -32,7 +32,6 @@ void Server::start_accept()
             start_accept();
         });
 }
-
 void Server::add_client(shared_ptr<asio::ip::tcp::socket> socket)
 {
     svDEBUG_LOG("DEBUG_Server", "add_client(shared_ptr<asio::ip::tcp::socket> socket)");

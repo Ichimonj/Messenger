@@ -3,6 +3,7 @@
 #include "asio.hpp"
 using namespace std;
 
+//acanthus statuses
 enum status
 {
 	offline,
@@ -10,6 +11,7 @@ enum status
 	dont_disturb,
 	invisible
 };
+
 // virtual classroom for all users
 class Account
 {

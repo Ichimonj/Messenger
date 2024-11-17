@@ -1,8 +1,9 @@
 #include "AccountFactory.hpp"
 
-//important: version without encryption and hashing
+//important: version without encryption
 uint64_t AccountFactory::count = 0;
 vector<uint64_t> AccountFactory::free_id{};
+
 void AccountFactory::make_account(shared_ptr<asio::ip::tcp::socket> socket)
 {
     afDEBUG_LOG("DEBUG_account_factory", "make_account");
@@ -20,6 +21,7 @@ void AccountFactory::make_account(shared_ptr<asio::ip::tcp::socket> socket)
     else    { EXCEPTIONS_LOG("Account_factory", "undefined connection type"); return; }
 }
 
+//Accounts/include/TempAccoutn.hpp
 void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket, error_code& ec)
 {
     afDEBUG_LOG("DEBUG_account_factory", "make_temp_account");
@@ -46,6 +48,7 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation temp account ID - "+to_string(ID)));
 }
 
+//Accounts/include/UserAccount.hpp
 void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket, error_code &ec)
 {
     afDEBUG_LOG("DEBUG_account_factory", "make_temp_account");

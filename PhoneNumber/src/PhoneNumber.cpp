@@ -1,11 +1,10 @@
 #include "PhoneNumber.hpp"
-// constructors
+//constructors
 PhoneNumber::PhoneNumber()
     : isValid_(false), phoneNumber_("NULL")
 {
     phDEBUG_LOG("DEBUG_phone", "PhoneNumber()");
 }
-
 PhoneNumber::PhoneNumber(const string &phoneNumber)
 {
     phDEBUG_LOG("DEBUG_phone", "PhoneNumber(const string& phoneNumber)");
@@ -41,13 +40,13 @@ PhoneNumber::PhoneNumber(PhoneNumber &&other) noexcept
     this->subscriberNumber_ = other.subscriberNumber_;
 }
 
-// destructor
+//destructor
 PhoneNumber::~PhoneNumber()
 {
     phDEBUG_LOG("DEBUG_phone", "~PhoneNumber()");
 }
 
-// operators
+//operators
 ostream &operator<<(ostream &os, const PhoneNumber &ex)
 {
     os << ex.phoneNumber_;
@@ -73,6 +72,7 @@ PhoneNumber &PhoneNumber::operator=(const PhoneNumber &other)
     return *this;
 }
 
+//sets
 void PhoneNumber::setNumber(string phoneNumber)
 {
     this->phoneNumber_ = phoneNumber;
@@ -80,13 +80,15 @@ void PhoneNumber::setNumber(string phoneNumber)
     if (isValid_)
         setCodes();
 }
+
+//gets
 string PhoneNumber::getNumber()const             { return this->phoneNumber_; }
 uint16_t PhoneNumber::getCountryCode()const      { return this->countryCode_; }
 uint16_t PhoneNumber::getOperatorCode()const     { return this->operatorCode_; }
 uint32_t PhoneNumber::getSubscriberNumber()const { return this->subscriberNumber_;}
 
+//other member functions
 const bool PhoneNumber::isValid() const { return isValid_; }
-
 void PhoneNumber::checkNumber()
 {
     phDEBUG_LOG("DEBUG_phone", "Start checkNumber()");

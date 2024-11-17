@@ -1,5 +1,6 @@
 #include "AbstractAccount.hpp"
 
+//constructors
 Account::Account(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string &userName,const string& password)
     : socket_(move(socket)), ID_(ID), userName_(userName),password_(password), status_(online)
 {
@@ -10,19 +11,20 @@ Account::Account(Account &&other) noexcept
 {
     acDEBUG_LOG("DEBUG_Virtual_account", "Account(Account&& other)");
 }
-
+//destructors
 Account::~Account()
 {
     acDEBUG_LOG("DEBUG_Virtual_account", "~Account()");
 }
 
+//hetaeras
 const uint64_t Account::getId()     const { return this->ID_; }
 const string Account::getUserName() const { return this->userName_; }
 const string Account::getPassword() const { return this->password_; }
 const status Account::getStatus()   const { return this->status_; }
 
+//other member functions
 void Account::print() const { cout << *this; }
-
 void Account::info() const
 {
     cout << "\033[38;5;250;48;5;22m";
@@ -30,7 +32,6 @@ void Account::info() const
     cout << setw(16) << left << setfill('.') << "User name" << userName_ << '\n';
     cout << "\033[0m";
 }
-
 uint8_t Account::login(shared_ptr<asio::ip::tcp::socket> socket)
 {
     acDEBUG_LOG("DEBUG_Virtual_account", "login");
@@ -41,6 +42,7 @@ uint8_t Account::login(shared_ptr<asio::ip::tcp::socket> socket)
     return 0;
 }
 
+//operators
 ostream &operator<<(ostream &os, const Account &ex)
 {
     cout << "\033[38;5;250;48;5;22m";
@@ -69,7 +71,6 @@ ostream &operator<<(ostream &os, const Account &ex)
     os << '\n';
     return os;
 }
-
 bool Account::operator<(const Account &ex)
 {
     return this->ID_ < ex.ID_;

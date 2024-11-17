@@ -1,12 +1,12 @@
 #include "UserAccount.hpp"
 
+//constructors
 UserAccount::UserAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string &userName, const string &password, const string &emale, const PhoneNumber &phoneNumber)
     : Account(socket, ID, userName, password), emale_(emale), phoneNumber_(phoneNumber)
 {
     acDEBUG_LOG("DEBUG_User_account", "UserAccount(const uint64_t ID, const string& userName, const string& password, const string& emale, const PhoneNumber& phoneNumber)");
     reading();
 }
-
 UserAccount::UserAccount(UserAccount &&other) noexcept
     : Account(move(other)), password_(move(other.password_)), emale_(move(emale_)), phoneNumber_(move(phoneNumber_))
 {
@@ -14,11 +14,13 @@ UserAccount::UserAccount(UserAccount &&other) noexcept
     reading();
 }
 
+//destructors
 UserAccount::~UserAccount()
 {
     acDEBUG_LOG("DEBUG_User_account", "~UserAccount()");
 }
 
+//other member functions
 void UserAccount::reading()
 {
     socket_->async_read_some(asio::buffer(buf),
@@ -49,6 +51,7 @@ void UserAccount::info() const
     Account::info();
 }
 
+//operators
 ostream &operator<<(ostream &os, const UserAccount &ex)
 {
     os << setw(16) << left << setfill('.') << "Emale" << ex.emale_ << '\n';

@@ -1,5 +1,6 @@
 #include "TempAccount.hpp"
 
+//constructors
 TempAccount::TempAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string& userName, const string& password)
     : Account(socket, ID, userName, password)
 {
@@ -12,12 +13,13 @@ TempAccount::TempAccount(TempAccount &&other) noexcept
     acDEBUG_LOG("DEBUG_Temp_account", "Account(Account&& other)");
     reading();
 }
-
+//destructors
 TempAccount::~TempAccount()
 {
     acDEBUG_LOG("DEBUG_Temp_account", "~TempAccount()");
 }
 
+//other member functions
 void TempAccount::reading()
 {
     socket_->async_read_some(asio::buffer(buf),
@@ -46,6 +48,7 @@ void TempAccount::info() const
     Account::info();
 }
 
+//operators
 ostream &operator<<(ostream &os, const TempAccount &ex)
 {
     os << "\033[0m";
