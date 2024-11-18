@@ -28,7 +28,6 @@ void UserAccount::reading()
         {
             if (!ec) {
                 thread([&]() {read_handler(buf, length); }).detach();
-                reading();
             }
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
@@ -39,7 +38,10 @@ void UserAccount::reading()
 }
 void UserAccount::read_handler(const char* buf, const size_t length)
 {
-    USER_MESSAGE(this->getUserName(), string(buf, length));
+    string msg(buf, length);
+    USER_MESSAGE(this->getUserName(), msg);
+
+    reading();
 }
 
 void UserAccount::print() const
