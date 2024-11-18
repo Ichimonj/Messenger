@@ -26,7 +26,7 @@ void TempAccount::reading()
         [&](const error_code& ec, size_t length)
         {
             if (!ec) {
-                USER_MESSAGE(this->getUserName(), string(buf, length));
+                thread([&]() {read_handler(buf, length); }).detach();
                 reading();
             }
             else {
@@ -36,6 +36,12 @@ void TempAccount::reading()
             }
         });
 }
+void TempAccount::read_handler(const char* buf, const size_t length)
+{
+    USER_MESSAGE(this->getUserName(), string(buf, length));
+}
+
+
 void TempAccount::print() const
 {
     cout << "\033[38;5;250;48;5;23m____Temp account____\n";
@@ -47,6 +53,7 @@ void TempAccount::info() const
     cout << "\033[38;5;250;48;5;23m____Temp account____\n";
     Account::info();
 }
+
 
 //operators
 ostream &operator<<(ostream &os, const TempAccount &ex)

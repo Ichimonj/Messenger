@@ -27,7 +27,7 @@ void UserAccount::reading()
         [&](const error_code& ec, size_t length)
         {
             if (!ec) {
-                USER_MESSAGE(this->getUserName(), string(buf, length));
+                thread([&]() {read_handler(buf, length); }).detach();
                 reading();
             }
             else {
@@ -36,6 +36,10 @@ void UserAccount::reading()
                 this->status_ = offline;
             }
         });
+}
+void UserAccount::read_handler(const char* buf, const size_t length)
+{
+    USER_MESSAGE(this->getUserName(), string(buf, length));
 }
 
 void UserAccount::print() const

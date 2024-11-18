@@ -19,6 +19,8 @@ public:
 	void print() 	const override;
 	void info() 	const override;
 
+private:
+	void read_handler(const char* buf, const size_t length);
 public:
 	friend ostream &operator<<(ostream &os, const TempAccount &ex);
 };
