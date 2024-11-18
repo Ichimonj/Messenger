@@ -1,7 +1,7 @@
 #include "AccountFactory.hpp"
 
 //important: version without encryption
-uint64_t AccountFactory::count = 0;
+atomic<uint64_t> AccountFactory::count = 0;
 vector<uint64_t> AccountFactory::free_id{};
 
 void AccountFactory::make_account(shared_ptr<asio::ip::tcp::socket> socket)
