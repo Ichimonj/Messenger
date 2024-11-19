@@ -40,8 +40,83 @@ void UserAccount::read_handler(const char* buf, const size_t length)
 {
     string msg(buf, length);
     USER_MESSAGE(this->getUserName(), msg);
+    //Change user name
+    if (msg == "__chName") {
+        error_code ec;
+        char buf[1024];
 
-    reading();
+        socket_->cancel();
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            socket_->close();
+            this->status_ = offline;
+            return;
+        }
+
+        string name_(buf, length);
+        this->userName_ = name_;
+
+        reading();
+    }
+    //Change password
+    else if (msg == "__chPaswd") {
+        error_code ec;
+        char buf[1024];
+
+        socket_->cancel();
+        //old password
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            socket_->close();
+            this->status_ = offline;
+            return;
+        }
+
+        string _password(buf, length);
+        _password = Hash(_password);
+        if (this->password_ != _password) {
+            reading();
+            return;
+        }
+
+        length = socket_->read_some(asio::buffer(buf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            socket_->close();
+            this->status_ = offline;
+            return;
+        }
+
+        _password = string(buf, length);
+        this->password_ = Hash(_password);
+
+        reading();
+    }
+    //exit
+    else if (msg == "__exit") {
+        error_code ec;
+        char buf[10];
+
+        socket_->cancel();
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            socket_->close();
+            this->status_ = offline;
+            return;
+        }
+
+        if (string(buf, length) == "__Y") {
+            ERROR_LOG("ERROR_Temp_account", "delete account");
+            socket_->close();
+            this->status_ = offline;
+        }
+        else {
+            ERROR_LOG("ERROR_Temp_account", "don't delete account");
+        }
+    }
 }
 
 void UserAccount::print() const

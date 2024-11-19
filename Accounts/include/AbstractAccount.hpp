@@ -46,5 +46,5 @@ protected:
 	const uint64_t 	ID_;
 	string 			userName_ = "NULL";
 	string			password_ = "NULL";
-	status 			status_ = online;
+	status 			status_	  = online;
 };

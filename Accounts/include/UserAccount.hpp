@@ -1,5 +1,7 @@
 #pragma once
 #include "AbstractAccount.hpp"
+#include "AccountFactory.hpp"
+#include "AccountBase.hpp"
 
 // Account for verified clients
 class UserAccount : public Account

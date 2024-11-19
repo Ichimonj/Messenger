@@ -27,6 +27,10 @@ void TempAccount::reading()
         {
             if (!ec) {
                 thread([&]() {read_handler(buf, length); }).detach();
+                reading();
+            }
+            else if (ec == asio::error::operation_aborted) {
+                acDEBUG_LOG("DEBUG_Temp_account", "stop async reading");
             }
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
@@ -39,10 +43,84 @@ void TempAccount::read_handler(const char* buf, const size_t length)
 {
     string msg(buf, length);
     USER_MESSAGE(this->getUserName(), msg);
+    //Change user name
+    if (msg == "__chName") {
+        error_code ec;
+        char buf[1024];
     
-    reading();
-}
+        socket_->cancel();
+        size_t length = socket_->read_some(asio::buffer(buf),ec);
+        if(ec){
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            AccountFactory::free_id.push_back(this->getId());
+            accountBase.erase(this->getId());
+            return;
+        }
 
+        string name_(buf, length);
+        this->userName_ = name_;
+
+        reading();
+    }
+    //Change password
+    else if (msg == "__chPaswd") {
+        error_code ec;
+        char buf[1024];
+
+        socket_->cancel();
+        //old password
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            AccountFactory::free_id.push_back(this->getId());
+            accountBase.erase(this->getId());
+            return;
+        }
+
+        string _password(buf, length);
+        _password = Hash(_password);
+        if (this->password_ != _password) {
+            reading();
+            return;
+        }
+
+        length = socket_->read_some(asio::buffer(buf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            AccountFactory::free_id.push_back(this->getId());
+            accountBase.erase(this->getId());
+            return;
+        }
+
+        _password = string(buf, length);
+        this->password_ = Hash(_password);
+
+        reading();
+    }
+    //exit
+    else if (msg == "__exit") {
+        error_code ec;
+        char buf[10];
+
+        socket_->cancel();
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            AccountFactory::free_id.push_back(this->getId());
+            accountBase.erase(this->getId());
+            return;
+        }
+
+        if (string(buf, length) == "__Y") {
+            ERROR_LOG("ERROR_Temp_account", "delete account");
+            AccountFactory::free_id.push_back(this->getId());
+            accountBase.erase(this->getId());
+        }
+        else {
+            ERROR_LOG("ERROR_Temp_account", "don't delete account");
+        }
+    }
+}
 
 void TempAccount::print() const
 {
