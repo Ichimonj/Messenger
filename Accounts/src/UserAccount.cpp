@@ -156,6 +156,29 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             this->phoneNumber_ = _phoneNumber;
             reading();
         }
+    }    
+    //delete accout
+    else if (msg == "__del") {
+        error_code ec;
+        char buf[10];
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            socket_->close();
+            this->status_ = offline;
+            return;
+        }
+
+        if (string(buf, length) == "__Y") {
+            acDEBUG_LOG("ERROR_Temp_account", string("Account - "+ to_string(this->getId()) + " delete"));
+            AccountFactory::free_id.push_back(this->getId());
+            accountBase.erase(this->getId());
+            return;
+        }
+        else {
+            acDEBUG_LOG("DEBUF_Temp_account", "don't delete account");
+            reading();
+        }
     }
     //exit
     else if (msg == "__exit") {
@@ -171,12 +194,12 @@ void UserAccount::read_handler(const char* buf, const size_t length)
         }
 
         if (string(buf, length) == "__Y") {
-            ERROR_LOG("ERROR_Temp_account", "delete account");
+            acDEBUG_LOG("ERROR_Temp_account", "delete account");
             socket_->close();
             this->status_ = offline;
         }
         else {
-            ERROR_LOG("ERROR_Temp_account", "don't delete account");
+            acDEBUG_LOG("ERROR_Temp_account", "don't delete account");
             reading();
         }
     }

@@ -124,12 +124,12 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         }
 
         if (string(buf, length) == "__Y") {
-            ERROR_LOG("ERROR_Temp_account", "delete account");
+            acDEBUG_LOG("ERROR_Temp_account", "delete account");
             AccountFactory::free_id.push_back(this->getId());
             accountBase.erase(this->getId());
         }
         else {
-            ERROR_LOG("ERROR_Temp_account", "don't delete account");
+            acDEBUG_LOG("ERROR_Temp_account", "don't delete account");
             reading();
         }
     }
