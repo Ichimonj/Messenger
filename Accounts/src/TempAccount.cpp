@@ -39,6 +39,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
 {
     string msg(buf, length);
     USER_MESSAGE(this->getUserName(), msg);
+    
     //Change user name
     if (msg == "__chName") {
         error_code ec;
@@ -92,21 +93,21 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 accountBase.erase(this->getId());
                 return;
             }
-            reading();
-        }
 
-        length = socket_->read_some(asio::buffer(buf), ec);
-        if (ec) {
-            ERROR_LOG("ERROR_Temp_account", "error reading");
-            AccountFactory::free_id.push_back(this->getId());
-            accountBase.erase(this->getId());
+            length = socket_->read_some(asio::buffer(buf), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+
+            _password = string(buf, length);
+            this->password_ = Hash(_password);
+            
+            reading();
             return;
         }
-
-        _password = string(buf, length);
-        this->password_ = Hash(_password);
-
-        reading();
     }
     //exit
     else if (msg == "__exit") {

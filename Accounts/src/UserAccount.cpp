@@ -8,7 +8,7 @@ UserAccount::UserAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_
     reading();
 }
 UserAccount::UserAccount(UserAccount &&other) noexcept
-    : Account(move(other)), password_(move(other.password_)), emale_(move(emale_)), phoneNumber_(move(phoneNumber_))
+    : Account(move(other)), emale_(move(emale_)), phoneNumber_(move(phoneNumber_))
 {
     acDEBUG_LOG("DEBUG_User_account", "UserAccount(UserAccount&& other)");
     reading();
@@ -40,12 +40,12 @@ void UserAccount::read_handler(const char* buf, const size_t length)
 {
     string msg(buf, length);
     USER_MESSAGE(this->getUserName(), msg);
+    
     //Change user name
     if (msg == "__chName") {
         error_code ec;
         char buf[1024];
 
-        socket_->cancel();
         size_t length = socket_->read_some(asio::buffer(buf), ec);
         if (ec) {
             ERROR_LOG("ERROR_Temp_account", "error reading");
@@ -63,9 +63,58 @@ void UserAccount::read_handler(const char* buf, const size_t length)
     else if (msg == "__chPaswd") {
         error_code ec;
         char buf[1024];
-
-        socket_->cancel();
+        
         //old password
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            AccountFactory::free_id.push_back(this->getId());
+            accountBase.erase(this->getId());
+            return;
+        }
+
+        string _password(buf, length);
+        _password = Hash(_password);
+        if (this->password_ != _password) {
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+            reading();
+            return;
+        }
+        else {
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+
+            length = socket_->read_some(asio::buffer(buf), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+
+            _password = string(buf, length);
+            this->password_ = Hash(_password);
+
+            reading();
+            return;
+        }
+    }
+    //Change emale
+    else if (msg == "__chEmale") {
+        error_code ec;
+        char buf[1024];
+
         size_t length = socket_->read_some(asio::buffer(buf), ec);
         if (ec) {
             ERROR_LOG("ERROR_Temp_account", "error reading");
@@ -74,31 +123,16 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             return;
         }
 
-        string _password(buf, length);
-        _password = Hash(_password);
-        if (this->password_ != _password) {
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }),ec);
-            if (ec) {
-                ERROR_LOG("ERROR_Temp_account", "error reading");
-                socket_->close();
-                this->status_ = offline;
-                return;
-            }
-            reading();
-            return;
-        }
-        else {
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }),ec);
-            if (ec) {
-                ERROR_LOG("ERROR_Temp_account", "error reading");
-                socket_->close();
-                this->status_ = offline;
-                return;
-            }
-            reading();
-        }
+        string _emale(buf, length);
+        this->emale_ = _emale;
+        reading();
+    }
+    //Change Phone number
+    else if (msg == "__chPN") {
+        error_code ec;
+        char buf[1024];
 
-        length = socket_->read_some(asio::buffer(buf), ec);
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
         if (ec) {
             ERROR_LOG("ERROR_Temp_account", "error reading");
             socket_->close();
@@ -106,17 +140,28 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             return;
         }
 
-        _password = string(buf, length);
-        this->password_ = Hash(_password);
-
-        reading();
+        PhoneNumber _phoneNumber(string(buf, length));
+        if (!_phoneNumber.isValid()) {
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                socket_->close();
+                this->status_ = offline;
+                return;
+            }
+            reading();
+        }
+        else {
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+            this->phoneNumber_ = _phoneNumber;
+            reading();
+        }
     }
     //exit
     else if (msg == "__exit") {
         error_code ec;
         char buf[10];
 
-        socket_->cancel();
         size_t length = socket_->read_some(asio::buffer(buf), ec);
         if (ec) {
             ERROR_LOG("ERROR_Temp_account", "error reading");

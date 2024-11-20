@@ -26,7 +26,6 @@ public:
 	friend ostream &operator<<(ostream &os, const UserAccount &ex);
 
 private:
-	string 		password_;
 	string 		emale_;
 	PhoneNumber phoneNumber_;
 };
