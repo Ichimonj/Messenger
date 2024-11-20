@@ -26,11 +26,7 @@ void TempAccount::reading()
         [&](const error_code& ec, size_t length)
         {
             if (!ec) {
-                thread([&]() {read_handler(buf, length); }).detach();
-                reading();
-            }
-            else if (ec == asio::error::operation_aborted) {
-                acDEBUG_LOG("DEBUG_Temp_account", "stop async reading");
+                thread([&]() {read_handler(buf, length); }).join();
             }
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
@@ -48,7 +44,6 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         error_code ec;
         char buf[1024];
     
-        socket_->cancel();
         size_t length = socket_->read_some(asio::buffer(buf),ec);
         if(ec){
             ERROR_LOG("ERROR_Temp_account", "error reading");
@@ -67,7 +62,6 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         error_code ec;
         char buf[1024];
 
-        socket_->cancel();
         //old password
         size_t length = socket_->read_some(asio::buffer(buf), ec);
         if (ec) {
@@ -98,6 +92,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 accountBase.erase(this->getId());
                 return;
             }
+            reading();
         }
 
         length = socket_->read_some(asio::buffer(buf), ec);
@@ -134,7 +129,11 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         }
         else {
             ERROR_LOG("ERROR_Temp_account", "don't delete account");
+            reading();
         }
+    }
+    else {
+        reading();
     }
 }
 
