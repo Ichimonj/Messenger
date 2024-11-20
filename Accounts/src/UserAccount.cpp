@@ -77,8 +77,24 @@ void UserAccount::read_handler(const char* buf, const size_t length)
         string _password(buf, length);
         _password = Hash(_password);
         if (this->password_ != _password) {
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }),ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                socket_->close();
+                this->status_ = offline;
+                return;
+            }
             reading();
             return;
+        }
+        else {
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }),ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                socket_->close();
+                this->status_ = offline;
+                return;
+            }
         }
 
         length = socket_->read_some(asio::buffer(buf), ec);
