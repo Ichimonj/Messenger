@@ -72,6 +72,17 @@ using namespace std;
 #define abDEBUG_LOG(debug_setup, msg)
 #endif // _DEBUG
 
+//========Chat manager========
+#ifdef _DEBUG
+#if (ACCOUNT_FACTORY_DEBUG == true)
+#define cmDEBUG_LOG(debug_setup, msg) clog << "\033[38;5;250;48;5;17m" << setw(FILL) << left << setfill('.') << debug_setup << msg << "\033[0m" << endl;
+#else
+#define cmDEBUG_LOG(debug_setup, msg)
+#endif // PHONE_NUMBER_DEBUG
+#else
+#define cmDEBUG_LOG(debug_setup, msg)
+#endif // _DEBUG
+
 //========Error========
 #ifdef _DEBUG
 #if (ERROR_DEBUG == true)

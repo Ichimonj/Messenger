@@ -109,12 +109,64 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             return;
         }
     }
+    //add chat
+    else if (msg == "__addChat") {
+        error_code ec;
+        char buf[20];
+
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        for (int i = 0; i < length; i++) {
+            if (!isdigit(buf[i])) {
+                acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
+
+                reading();
+                return;
+            }
+        }
+        uint64_t ID(stoi(string(buf, length)));
+        if (chatManager.addSoloChat(ID) == 1) {
+            acDEBUG_LOG("DEBUG_Temp_account", "invalid ID");
+
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+
+            reading();
+            return;
+        }
+        acDEBUG_LOG("DEBUG_Temp_account", "user added");
+        socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+        reading();
+    }
+    //select chat
+    else if (msg == "__selectChat") {
+        error_code ec;
+        char buf[10];
+        
+        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        for (int i = 0; i < length; i++) {
+            if (!isdigit(buf[i])) {
+                acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
+
+                reading();
+                return;
+            }
+        }
+        uint32_t index(stoi(string(buf, length)));
+        if (chatManager.setChatIndex(index) == 1) {
+            acDEBUG_LOG("DEBUG_Temp_account", "error chat index");
+
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+
+            reading();
+            return;
+        }
+        socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+        reading();
+    }
     //exit
     else if (msg == "__exit") {
         error_code ec;
         char buf[10];
 
-        socket_->cancel();
         size_t length = socket_->read_some(asio::buffer(buf), ec);
         if (ec) {
             ERROR_LOG("ERROR_Temp_account", "error reading");
@@ -134,6 +186,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         }
     }
     else {
+        chatManager.printChat(string(this->getUserName() + " - " + msg + "\n"));
         reading();
     }
 }

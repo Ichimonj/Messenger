@@ -2,6 +2,8 @@
 #include "AbstractAccount.hpp"
 #include "AccountFactory.hpp"
 #include "AccountBase.hpp"
+#include "ChatManager.hpp"
+
 // temporary account
 class TempAccount : public Account
 {
@@ -23,4 +25,7 @@ private:
 	void read_handler(const char* buf, const size_t length);
 public:
 	friend ostream &operator<<(ostream &os, const TempAccount &ex);
+
+private:
+	ChatManager chatManager;
 };

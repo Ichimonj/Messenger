@@ -3,7 +3,6 @@
 #include"AccountBase.hpp"
 #include"atomic"
 #include"Hash.hpp"
-
 //factory design pattern
 //CLASS RESPONSIBLE FOR CREATION OF ACCOUNTS
 class AccountFactory
