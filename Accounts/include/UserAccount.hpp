@@ -2,6 +2,7 @@
 #include "AbstractAccount.hpp"
 #include "AccountFactory.hpp"
 #include "AccountBase.hpp"
+#include "ChatManager.hpp"
 
 // Account for verified clients
 class UserAccount : public Account
@@ -28,4 +29,6 @@ public:
 private:
 	string 		emale_;
 	PhoneNumber phoneNumber_;
+
+	ChatManager chatManager;
 };

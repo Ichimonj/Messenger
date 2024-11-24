@@ -30,7 +30,7 @@ void UserAccount::reading()
                 thread([&]() {read_handler(buf, length); }).join();
             }
             else {
-                ERROR_LOG("ERROR_Temp_account", "error reading");
+                ERROR_LOG("ERROR_User_account", "error reading");
                 socket_->close();
                 this->status_ = offline;
             }
@@ -40,171 +40,252 @@ void UserAccount::read_handler(const char* buf, const size_t length)
 {
     string msg(buf, length);
     USER_MESSAGE(this->getUserName(), msg);
-    
-    //Change user name
-    if (msg == "__chName") {
-        error_code ec;
-        char buf[1024];
 
-        size_t length = socket_->read_some(asio::buffer(buf), ec);
+    /*account operations*/
+    if (msg == "__chAccount") {
+        error_code ec;
+        char subBuf[1024];
+
+        size_t length = socket_->read_some(asio::buffer(subBuf), ec);
         if (ec) {
-            ERROR_LOG("ERROR_Temp_account", "error reading");
-            socket_->close();
+            ERROR_LOG("ERROR_User_account", "error reading");
+            this->socket_->close();
             this->status_ = offline;
             return;
         }
+        msg = string(subBuf, length);
 
-        string name_(buf, length);
-        this->userName_ = name_;
-
-        reading();
-    }
-    //Change password
-    else if (msg == "__chPaswd") {
-        error_code ec;
-        char buf[1024];
-        
-        //old password
-        size_t length = socket_->read_some(asio::buffer(buf), ec);
-        if (ec) {
-            ERROR_LOG("ERROR_Temp_account", "error reading");
-            AccountFactory::free_id.push_back(this->getId());
-            accountBase.erase(this->getId());
-            return;
-        }
-
-        string _password(buf, length);
-        _password = Hash(_password);
-        if (this->password_ != _password) {
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+        //Change user name
+        if (msg == "__chName") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
             if (ec) {
-                ERROR_LOG("ERROR_Temp_account", "error reading");
-                AccountFactory::free_id.push_back(this->getId());
-                accountBase.erase(this->getId());
+                ERROR_LOG("ERROR_User_account", "error reading");
+                this->socket_->close();
+                this->status_ = offline;
                 return;
             }
+
+            msg = string(subBuf, length);
+            this->userName_ = msg;
+
             reading();
-            return;
+        }
+        //Change password
+        else if (msg == "__chPaswd") {
+            //old password
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_User_account", "error reading");
+                this->socket_->close();
+                this->status_ = offline;
+                return;
+            }
+
+            msg = string(subBuf, length);
+            if (this->password_ == Hash(msg)) {
+                //new password
+                length = socket_->read_some(asio::buffer(subBuf), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_User_account", "error reading");
+                    this->socket_->close();
+                    this->status_ = offline;
+                    return;
+                }
+
+                msg = string(subBuf, length);
+                this->password_ = Hash(msg);
+
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_User_account", "error reading");
+                    this->socket_->close();
+                    this->status_ = offline;
+                    return;
+                }
+                reading();
+                return;
+            }
+            else {
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_User_account", "error reading");
+                    this->socket_->close();
+                    this->status_ = offline;
+                    return;
+                }
+                reading();
+                return;
+            }
+        }
+        //Change emale
+        else if (msg == "__chEmale") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_User_account", "error reading");
+                this->socket_->close();
+                this->status_ = offline;
+                return;
+            }
+
+            msg = string(subBuf, length);
+            this->emale_ = msg;
+
+            reading();
+        }
+        //Change phone number
+        else if (msg == "__chPhoneNumber") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_User_account", "error reading");
+                this->socket_->close();
+                this->status_ = offline;
+                return;
+            }
+
+            PhoneNumber phoneNumber(string(subBuf, length));
+            if (phoneNumber.isValid()) {
+                acDEBUG_LOG("DEBUG_User_account", "Phone number valid");
+
+                this->phoneNumber_ = phoneNumber;
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+            }
+            else {
+                acDEBUG_LOG("DEBUG_User_account", "Phone number not valid");
+
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+            }
+            reading();
+        }
+        //exit
+        else if (msg == "__exit") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_User_account", "error reading");
+                this->socket_->close();
+                this->status_ = offline;
+                return;
+            }
+
+            if (string(subBuf, length) == "__Y") {
+                acDEBUG_LOG("ERROR_Temp_account", "delete account");
+                this->socket_->close();
+                this->status_ = offline;
+                return;
+            }
+            else {
+                acDEBUG_LOG("ERROR_Temp_account", "don't delete account");
+
+                reading();
+                return;
+            }
         }
         else {
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
-            if (ec) {
-                ERROR_LOG("ERROR_Temp_account", "error reading");
-                AccountFactory::free_id.push_back(this->getId());
-                accountBase.erase(this->getId());
-                return;
-            }
-
-            length = socket_->read_some(asio::buffer(buf), ec);
-            if (ec) {
-                ERROR_LOG("ERROR_Temp_account", "error reading");
-                AccountFactory::free_id.push_back(this->getId());
-                accountBase.erase(this->getId());
-                return;
-            }
-
-            _password = string(buf, length);
-            this->password_ = Hash(_password);
-
             reading();
             return;
         }
     }
-    //Change emale
-    else if (msg == "__chEmale") {
+    /*chat operations*/
+    else if (msg == "__chat") {
         error_code ec;
-        char buf[1024];
+        char subBuf[1024];
 
-        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        size_t length = socket_->read_some(asio::buffer(subBuf), ec);
         if (ec) {
-            ERROR_LOG("ERROR_Temp_account", "error reading");
-            socket_->close();
+            ERROR_LOG("ERROR_User_account", "error reading");
+            this->socket_->close();
             this->status_ = offline;
             return;
         }
+        msg = string(subBuf, length);
 
-        string _emale(buf, length);
-        this->emale_ = _emale;
-        reading();
-    }
-    //Change Phone number
-    else if (msg == "__chPN") {
-        error_code ec;
-        char buf[1024];
-
-        size_t length = socket_->read_some(asio::buffer(buf), ec);
-        if (ec) {
-            ERROR_LOG("ERROR_Temp_account", "error reading");
-            socket_->close();
-            this->status_ = offline;
-            return;
-        }
-
-        PhoneNumber _phoneNumber(string(buf, length));
-        if (!_phoneNumber.isValid()) {
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+        //add chat
+        if (msg == "__addChat") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
             if (ec) {
-                ERROR_LOG("ERROR_Temp_account", "error reading");
-                socket_->close();
+                ERROR_LOG("ERROR_User_account", "error reading");
+                this->socket_->close();
+                this->status_ = offline;
+                return;
+            }
+
+            for (int i = 0; i < length; i++) {
+                if (!isdigit(subBuf[i])) {
+                    acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
+
+                    reading();
+                    return;
+                }
+            }
+
+            uint64_t ID(stoi(string(subBuf, length)));
+            if (chatManager.addSoloChat(ID) == 1) {
+                acDEBUG_LOG("DEBUG_Temp_account", "invalid ID");
+
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_User_account", "error reading");
+                    this->socket_->close();
+                    this->status_ = offline;
+                    return;
+                }
+
+                reading();
+                return;
+            }
+            acDEBUG_LOG("DEBUG_Temp_account", "user added");
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_User_account", "error reading");
+                this->socket_->close();
+                this->status_ = offline;
+                return;
+            }
+
+            reading();
+        }
+        else if (msg == "__selectChat") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            for (int i = 0; i < length; i++) {
+                if (!isdigit(subBuf[i])) {
+                    acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
+
+                    reading();
+                    return;
+                }
+            }
+
+            uint32_t index(stoi(string(subBuf, length)));
+            if (chatManager.setChatIndex(index) == 1) {
+                acDEBUG_LOG("DEBUG_Temp_account", "error chat index");
+
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_User_account", "error reading");
+                    this->socket_->close();
+                    this->status_ = offline;
+                    return;
+                }
+                reading();
+                return;
+            }
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_User_account", "error reading");
+                this->socket_->close();
                 this->status_ = offline;
                 return;
             }
             reading();
         }
         else {
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
-            this->phoneNumber_ = _phoneNumber;
             reading();
-        }
-    }    
-    //delete accout
-    else if (msg == "__del") {
-        error_code ec;
-        char buf[10];
-        size_t length = socket_->read_some(asio::buffer(buf), ec);
-        if (ec) {
-            ERROR_LOG("ERROR_Temp_account", "error reading");
-            socket_->close();
-            this->status_ = offline;
             return;
-        }
-
-        if (string(buf, length) == "__Y") {
-            acDEBUG_LOG("ERROR_Temp_account", string("Account - "+ to_string(this->getId()) + " delete"));
-            AccountFactory::free_id.push_back(this->getId());
-            accountBase.erase(this->getId());
-            return;
-        }
-        else {
-            acDEBUG_LOG("DEBUF_Temp_account", "don't delete account");
-            reading();
         }
     }
-    //exit
-    else if (msg == "__exit") {
-        error_code ec;
-        char buf[10];
-
-        size_t length = socket_->read_some(asio::buffer(buf), ec);
-        if (ec) {
-            ERROR_LOG("ERROR_Temp_account", "error reading");
-            socket_->close();
-            this->status_ = offline;
-            return;
-        }
-
-        if (string(buf, length) == "__Y") {
-            acDEBUG_LOG("ERROR_Temp_account", "delete account");
-            socket_->close();
-            this->status_ = offline;
-        }
-        else {
-            acDEBUG_LOG("ERROR_Temp_account", "don't delete account");
-            reading();
-        }
-    }
+    /*msg output*/
     else {
         reading();
+        chatManager.printChat(string(this->getUserName() + " - " + msg + '\n'));
     }
 }
 
