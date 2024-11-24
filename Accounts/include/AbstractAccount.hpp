@@ -9,7 +9,9 @@ enum status
 	offline,
 	online,
 	dont_disturb,
-	invisible
+	invisible,
+
+	deleted
 };
 
 // virtual classroom for all users

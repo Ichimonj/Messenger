@@ -31,6 +31,14 @@ int ChatManager::printChat(string&& msg)
         soloChat[chatIndex - 1]->getSocket()->write_some(asio::buffer(msg.data(), msg.length()), ec);
         if (ec) {
             ERROR_LOG("ERROR_Chat_manager", ec.message());
+
+            if (soloChat[chatIndex - 1]->getStatus() == deleted) {
+                ERROR_LOG("ERROR_Chat_manager", "Account deleted");
+                soloChat.erase(soloChat.begin() + (chatIndex - 1));
+                chatIndex = 0;
+                return 2;
+            }
+
             return 1;
         }
         return 0;

@@ -284,8 +284,17 @@ void UserAccount::read_handler(const char* buf, const size_t length)
     }
     /*msg output*/
     else {
+        if (chatManager.printChat(string(this->getUserName() + " - " + msg + '\n')) == 2) {
+            error_code ec;
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(2) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_User_account", "error reading");
+                this->socket_->close();
+                this->status_ = offline;
+                return;
+            }
+        }
         reading();
-        chatManager.printChat(string(this->getUserName() + " - " + msg + '\n'));
     }
 }
 

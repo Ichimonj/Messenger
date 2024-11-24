@@ -30,6 +30,7 @@ void TempAccount::reading()
             }
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
             }
@@ -48,6 +49,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         size_t length = socket_->read_some(asio::buffer(subBuf), ec);
         if (ec) {
             ERROR_LOG("ERROR_Temp_account", "error reading");
+            this->status_ = deleted;
             AccountFactory::free_id.push_back(this->getId());
             accountBase.erase(this->getId());
             return;
@@ -59,6 +61,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             length = socket_->read_some(asio::buffer(subBuf), ec);
             if (ec) {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
                 return;
@@ -75,6 +78,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             length = socket_->read_some(asio::buffer(subBuf), ec);
             if (ec) {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
                 return;
@@ -86,6 +90,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 length = socket_->read_some(asio::buffer(subBuf), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
                     AccountFactory::free_id.push_back(this->getId());
                     accountBase.erase(this->getId());
                     return;
@@ -97,6 +102,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
                     AccountFactory::free_id.push_back(this->getId());
                     accountBase.erase(this->getId());
                     return;
@@ -108,6 +114,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
                     AccountFactory::free_id.push_back(this->getId());
                     accountBase.erase(this->getId());
                     return;
@@ -121,6 +128,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             length = socket_->read_some(asio::buffer(subBuf), ec);
             if (ec) {
                 acDEBUG_LOG("ERROR_Temp_account", "delete account");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
                 return;
@@ -128,6 +136,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
 
             if (string(subBuf, length) == "__Y") {
                 acDEBUG_LOG("ERROR_Temp_account", "delete account");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
                 return;
@@ -152,6 +161,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         size_t length = socket_->read_some(asio::buffer(subBuf), ec);
         if (ec) {
             ERROR_LOG("ERROR_Temp_account", "error reading");
+            this->status_ = deleted;
             AccountFactory::free_id.push_back(this->getId());
             accountBase.erase(this->getId());
             return;
@@ -163,6 +173,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             length = socket_->read_some(asio::buffer(subBuf), ec);
             if (ec) {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
                 return;
@@ -184,6 +195,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
                     AccountFactory::free_id.push_back(this->getId());
                     accountBase.erase(this->getId());
                     return;
@@ -196,6 +208,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
             if (ec) {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
                 return;
@@ -221,6 +234,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
                     AccountFactory::free_id.push_back(this->getId());
                     accountBase.erase(this->getId());
                     return;
@@ -231,6 +245,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
             if (ec) {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
                 return;
@@ -244,8 +259,18 @@ void TempAccount::read_handler(const char* buf, const size_t length)
     }
     /*msg output*/
     else {
+        if (chatManager.printChat(string(this->getUserName() + " - " + msg + '\n')) == 2) {
+            error_code ec;
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(2) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+        }
         reading();
-        chatManager.printChat(string(this->getUserName() + " - " + msg + '\n'));
     }
 }
 
