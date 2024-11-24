@@ -1,5 +1,5 @@
 #include "UserAccount.hpp"
-
+#include "ServerError.hpp"
 //constructors
 UserAccount::UserAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string &userName, const string &password, const string &emale, const PhoneNumber &phoneNumber)
     : Account(socket, ID, userName, password), emale_(emale), phoneNumber_(phoneNumber)
@@ -95,7 +95,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
                 msg = string(subBuf, length);
                 this->password_ = Hash(msg);
 
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_User_account", "error reading");
                     this->socket_->close();
@@ -106,7 +106,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
                 return;
             }
             else {
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_User_account", "error reading");
                     this->socket_->close();
@@ -147,12 +147,12 @@ void UserAccount::read_handler(const char* buf, const size_t length)
                 acDEBUG_LOG("DEBUG_User_account", "Phone number valid");
 
                 this->phoneNumber_ = phoneNumber;
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
             }
             else {
                 acDEBUG_LOG("DEBUG_User_account", "Phone number not valid");
 
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
             }
             reading();
         }
@@ -221,7 +221,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             if (chatManager.addSoloChat(ID) == 1) {
                 acDEBUG_LOG("DEBUG_Temp_account", "invalid ID");
 
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_User_account", "error reading");
                     this->socket_->close();
@@ -233,7 +233,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
                 return;
             }
             acDEBUG_LOG("DEBUG_Temp_account", "user added");
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
             if (ec) {
                 ERROR_LOG("ERROR_User_account", "error reading");
                 this->socket_->close();
@@ -258,7 +258,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             if (chatManager.setChatIndex(index) == 1) {
                 acDEBUG_LOG("DEBUG_Temp_account", "error chat index");
 
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_User_account", "error reading");
                     this->socket_->close();
@@ -268,7 +268,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
                 reading();
                 return;
             }
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
             if (ec) {
                 ERROR_LOG("ERROR_User_account", "error reading");
                 this->socket_->close();
@@ -286,7 +286,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
     else {
         if (chatManager.printChat(string(this->getUserName() + " - " + msg + '\n')) == 2) {
             error_code ec;
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(2) }), ec);
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::msgInDeleteACcount) }), ec);
             if (ec) {
                 ERROR_LOG("ERROR_User_account", "error reading");
                 this->socket_->close();

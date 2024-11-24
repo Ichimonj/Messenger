@@ -1,5 +1,5 @@
 #include "ChatManager.hpp"
-#include"AccountBase.hpp"
+#include "AccountBase.hpp"
 #include "Preprocessor.hpp"
 ChatManager::ChatManager()
 {
@@ -38,7 +38,6 @@ int ChatManager::printChat(string&& msg)
                 chatIndex = 0;
                 return 2;
             }
-
             return 1;
         }
         return 0;

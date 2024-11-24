@@ -1,5 +1,5 @@
 #include "TempAccount.hpp"
-
+#include "ServerError.hpp"
 //constructors
 TempAccount::TempAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string& userName, const string& password)
     : Account(socket, ID, userName, password)
@@ -99,7 +99,8 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 msg = string(subBuf, length);
                 this->password_ = Hash(msg);
 
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+                //successful password change
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_Temp_account", "error reading");
                     this->status_ = deleted;
@@ -111,7 +112,8 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 return;
             }
             else {
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                //password entered is incorrect
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_Temp_account", "error reading");
                     this->status_ = deleted;
@@ -192,7 +194,8 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             if (chatManager.addSoloChat(ID) == 1) {
                 acDEBUG_LOG("DEBUG_Temp_account", "invalid ID");
 
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                //incorrect id entered
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_Temp_account", "error reading");
                     this->status_ = deleted;
@@ -205,7 +208,9 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 return;
             }
             acDEBUG_LOG("DEBUG_Temp_account", "user added");
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+
+            //successful client addition
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
             if (ec) {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
                 this->status_ = deleted;
@@ -231,7 +236,8 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             if (chatManager.setChatIndex(index) == 1) {
                 acDEBUG_LOG("DEBUG_Temp_account", "error chat index");
 
-                socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }), ec);
+                //incorrect index entered
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
                 if (ec) {
                     ERROR_LOG("ERROR_Temp_account", "error reading");
                     this->status_ = deleted;
@@ -242,7 +248,9 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 reading();
                 return;
             }
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }), ec);
+
+            //seccessful select chat
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
             if (ec) {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
                 this->status_ = deleted;
@@ -261,7 +269,9 @@ void TempAccount::read_handler(const char* buf, const size_t length)
     else {
         if (chatManager.printChat(string(this->getUserName() + " - " + msg + '\n')) == 2) {
             error_code ec;
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(2) }), ec);
+            
+            //attempt to send a message to a remote account
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::msgInDeleteACcount) }), ec);
             if (ec) {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
                 this->status_ = deleted;
