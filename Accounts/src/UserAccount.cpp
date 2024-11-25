@@ -284,7 +284,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
     }
     /*msg output*/
     else {
-        if (chatManager.printChat(string(this->getUserName() + " - " + msg + '\n')) == 2) {
+        if (chatManager.printChat(string("${" + to_string(this->getId()) + '}' + '[' + this->getUserName() + ']' + msg)) == 2) {
             error_code ec;
             socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::msgInDeleteACcount) }), ec);
             if (ec) {
