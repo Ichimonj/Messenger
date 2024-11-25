@@ -167,13 +167,13 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             }
 
             if (string(subBuf, length) == "__Y") {
-                acDEBUG_LOG("ERROR_Temp_account", "delete account");
+                acDEBUG_LOG("ERROR_Temp_account", "log out of account");
                 this->socket_->close();
                 this->status_ = offline;
                 return;
             }
             else {
-                acDEBUG_LOG("ERROR_Temp_account", "don't delete account");
+                acDEBUG_LOG("ERROR_Temp_account", "don't log out of account");
 
                 reading();
                 return;
