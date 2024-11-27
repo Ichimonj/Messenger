@@ -218,7 +218,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             }
 
             uint64_t ID(stoi(string(subBuf, length)));
-            if (chatManager.addSoloChat(ID) == 1) {
+            if (chatManager.addSoloChat(ID, this->socket_) == 1) {
                 acDEBUG_LOG("DEBUG_Temp_account", "invalid ID");
 
                 socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);

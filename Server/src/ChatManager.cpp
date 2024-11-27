@@ -5,13 +5,15 @@ ChatManager::ChatManager()
 {
 }
 
-int ChatManager::addSoloChat(uint64_t ID)
+int ChatManager::addSoloChat(uint64_t ID,shared_ptr<asio::ip::tcp::socket> socket)
 {
     shared_ptr<Account> user = accountBase.findUser(ID);
     if (user != nullptr) {
         cmDEBUG_LOG("DEBUG_Chat_manager", "add user in chat");
-        soloChat.push_back(user);
-        
+        soloChat.insert({ user->getId(),user });
+
+        string msg = string("@{" + to_string(user->getId()) + '}' + '[' + user->getUserName() + ']');
+        socket->write_some(asio::buffer(msg.data(), msg.length()));
         return 0;
     }
     else {
@@ -22,36 +24,33 @@ int ChatManager::addSoloChat(uint64_t ID)
 
 int ChatManager::printChat(string&& msg)
 {
-    if (chatIndex > soloChat.size() || chatIndex <= 0) {
-        cmDEBUG_LOG("DEBUG_Chat_manager", "error chat index");
-        return 1;
-    }
-    else {
+    if (ñorrespondent != nullptr) {
         error_code ec;
-        soloChat[chatIndex - 1]->getSocket()->write_some(asio::buffer(msg.data(), msg.length()), ec);
+        ñorrespondent->getSocket()->write_some(asio::buffer(msg.data(), msg.length()), ec);
         if (ec) {
             ERROR_LOG("ERROR_Chat_manager", ec.message());
 
             if (soloChat[chatIndex - 1]->getStatus() == deleted) {
                 ERROR_LOG("ERROR_Chat_manager", "Account deleted");
-                soloChat.erase(soloChat.begin() + (chatIndex - 1));
+                soloChat.erase(ñorrespondent->getId());
                 chatIndex = 0;
                 return 2;
             }
             return 1;
         }
-        return 0;
     }
+    return 0;
 }
 
-int ChatManager::setChatIndex(uint32_t index)
+int ChatManager::setChatIndex(uint64_t index)
 {
-    if (chatIndex > soloChat.size() || chatIndex < 0) {
+    auto user = soloChat.find(index);
+    if (user == soloChat.end()) {
         cmDEBUG_LOG("DEBUG_Chat_manager", "error chat index");
         return 1;
     }
     else {
-        chatIndex = index;
-        return 0;
+        ñorrespondent = user->second;
     }
+    return 0;
 }
