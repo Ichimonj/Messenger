@@ -12,6 +12,9 @@ public:
     static vector<uint64_t> free_id;
 
 private:
+    static mutex mtAccountInsert;
+    static mutex mtAssignmentId;
+
     static atomic<uint64_t> count;
     //Accounts/include/TempAccoutn.hpp
     static void make_temp_account(shared_ptr<asio::ip::tcp::socket> socket, error_code& ec);

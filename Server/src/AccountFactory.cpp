@@ -3,6 +3,8 @@
 //important: version without encryption
 atomic<uint64_t> AccountFactory::count = 0;
 vector<uint64_t> AccountFactory::free_id{};
+mutex AccountFactory::mtAssignmentId;
+mutex AccountFactory::mtAccountInsert;
 
 void AccountFactory::make_account(shared_ptr<asio::ip::tcp::socket> socket)
 {
@@ -38,12 +40,17 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     _password = Hash(_password);
 
     uint64_t ID;
+    mtAssignmentId.lock();
     if (free_id.empty()) { ID = count++; }
     else {
         ID = free_id.back();
         free_id.pop_back();
     }
+    mtAssignmentId.unlock();
+
+    mtAccountInsert.lock();
     accountBase.insert(make_shared<TempAccount>(socket, ID, _userName,_password));
+    mtAccountInsert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation temp account ID - "+to_string(ID)));
 }
@@ -74,12 +81,17 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
     PhoneNumber _phoneNumber(string(buf, lenght));
 
     uint64_t ID;
+    mtAssignmentId.lock();
     if (free_id.empty()) { ID = count++; }
     else {
         ID = free_id.back();
         free_id.pop_back();
     }
+    mtAssignmentId.unlock();
+
+    mtAccountInsert.lock();
     accountBase.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _emale, _phoneNumber));
+    mtAccountInsert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation user account ID - " + to_string(ID)));
 }
