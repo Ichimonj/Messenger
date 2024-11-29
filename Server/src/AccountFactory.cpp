@@ -123,6 +123,7 @@ void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, err
 
     if (user->getPassword() == _password) {
         if (user->login(socket) == 1) { EXCEPTIONS_LOG("Account_factory", "account is already taken"); }
+        else { user->outBuffer(); }
 
         afDEBUG_LOG("DEBUG_account_factory", string("successful login account ID - " + to_string(ID)));
     }

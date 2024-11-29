@@ -295,6 +295,9 @@ void TempAccount::info() const
     cout << "\033[38;5;250;48;5;23m____Temp account____\n";
     Account::info();
 }
+//The temporary account will be deleted after logging out, there is no need to archive messages
+void TempAccount::bufferingMsg(string& msg){ }
+void TempAccount::outBuffer(){ }
 
 
 //operators

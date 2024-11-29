@@ -59,3 +59,14 @@ int ChatManager::setChatIndex(uint64_t index)
     }
     return 0;
 }
+
+void ChatManager::bufferingMsg(string& msg)
+{
+    cmDEBUG_LOG("DEBUG_Chat_manager", "buffering msg");
+    this->bufferMsg.push_back(msg);
+}
+
+vector<string> ChatManager::getBuffer()
+{
+    return this->bufferMsg;
+}

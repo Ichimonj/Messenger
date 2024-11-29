@@ -36,6 +36,9 @@ public:
 	virtual void reading() 	= 0;
 	virtual void print() 	const;
 	virtual void info() 	const;
+	virtual void bufferingMsg(string& msg) = 0;
+	virtual void outBuffer() = 0;
+
 
 	uint8_t login(shared_ptr<asio::ip::tcp::socket> socket);
 public:

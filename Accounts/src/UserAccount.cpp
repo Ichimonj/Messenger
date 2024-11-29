@@ -33,6 +33,7 @@ void UserAccount::reading()
                 ERROR_LOG("ERROR_User_account", "error reading");
                 socket_->close();
                 this->status_ = offline;
+                return;
             }
         });
 }
@@ -309,6 +310,30 @@ void UserAccount::info() const
 {
     cout << "\033[38;5;250;48;5;23m____User account____\n";
     Account::info();
+}
+
+void UserAccount::bufferingMsg(string& msg)
+{
+    this->chatManager.bufferingMsg(msg+='\n');
+}
+
+void UserAccount::outBuffer()
+{
+    for (auto& ex : chatManager.getBuffer()) {
+        this->socket_->async_write_some(asio::buffer(ex.data(), ex.length()),
+            [&](const error_code& ec, size_t) {
+                if (ec) {
+                    ERROR_LOG("ERROR_User_account", "error reading");
+                    this->socket_->close();
+                    this->status_ = offline;
+                    return;
+                }
+                else {
+                    acDEBUG_LOG("DEBUG_Temp_account", "out buffer");
+                }
+            });
+    }
+    chatManager.getBuffer().clear();
 }
 
 //operators
