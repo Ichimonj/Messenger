@@ -24,21 +24,21 @@ int ChatManager::addSoloChat(uint64_t ID,shared_ptr<asio::ip::tcp::socket> socke
 
 int ChatManager::printChat(string&& msg)
 {
-    if (ñorrespondent != nullptr) {
+    if (correspondent != nullptr) {
         error_code ec;
-        ñorrespondent->getSocket()->write_some(asio::buffer(msg.data(), msg.length()), ec);
+        correspondent->getSocket()->write_some(asio::buffer(msg.data(), msg.length()), ec);
         if (ec) {
             ERROR_LOG("ERROR_Chat_manager", ec.message());
 
-            if (ñorrespondent->getStatus() == deleted) {
+            if (correspondent->getStatus() == deleted) {
                 ERROR_LOG("ERROR_Chat_manager", "Account deleted");
-                soloChat.erase(ñorrespondent->getId());
-                this->ñorrespondent = nullptr;
+                soloChat.erase(correspondent->getId());
+                this->correspondent = nullptr;
                 return 2;
             }
-            else if(ñorrespondent->getStatus() == offline){
+            else if(correspondent->getStatus() == offline){
                 cmDEBUG_LOG("DEBUG_Chat_manager", "buffering msg");
-                ñorrespondent->bufferingMsg(msg);
+                correspondent->bufferingMsg(msg);
                 return 0;
             }
             return 1;
@@ -58,7 +58,7 @@ int ChatManager::setChatIndex(uint64_t index)
         return 1;
     }
     else {
-        ñorrespondent = user->second;
+        correspondent = user->second;
     }
     return 0;
 }

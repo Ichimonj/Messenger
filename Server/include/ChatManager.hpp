@@ -13,7 +13,7 @@ public:
 	vector<string> getBuffer();
 
 private:
-	shared_ptr<Account> ñorrespondent;
+	shared_ptr<Account> correspondent;
 	map<uint64_t, shared_ptr<Account>> soloChat;
 
 	vector<string> bufferMsg;
