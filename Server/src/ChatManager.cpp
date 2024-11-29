@@ -33,7 +33,7 @@ int ChatManager::printChat(string&& msg)
             if (ñorrespondent->getStatus() == deleted) {
                 ERROR_LOG("ERROR_Chat_manager", "Account deleted");
                 soloChat.erase(ñorrespondent->getId());
-                chatIndex = 0;
+                this->ñorrespondent = nullptr;
                 return 2;
             }
             else if(ñorrespondent->getStatus() == offline){
@@ -43,6 +43,9 @@ int ChatManager::printChat(string&& msg)
             }
             return 1;
         }
+    }
+    else {
+        return 2;
     }
     return 0;
 }

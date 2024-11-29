@@ -11,8 +11,8 @@ public:
 
 	void bufferingMsg(string& msg);
 	vector<string> getBuffer();
+
 private:
-	uint32_t chatIndex{ 0 };
 	shared_ptr<Account> ñorrespondent;
 	map<uint64_t, shared_ptr<Account>> soloChat;
 
