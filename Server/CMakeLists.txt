@@ -5,6 +5,7 @@ set(SOURCES
     src/AccountBase.cpp
     src/AccountFactory.cpp
     src/Server.cpp
+    src/ChatManager.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

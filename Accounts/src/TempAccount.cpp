@@ -1,5 +1,5 @@
 #include "TempAccount.hpp"
-
+#include "ServerError.hpp"
 //constructors
 TempAccount::TempAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string& userName, const string& password)
     : Account(socket, ID, userName, password)
@@ -30,6 +30,7 @@ void TempAccount::reading()
             }
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
             }
@@ -40,100 +41,245 @@ void TempAccount::read_handler(const char* buf, const size_t length)
     string msg(buf, length);
     USER_MESSAGE(this->getUserName(), msg);
     
-    //Change user name
-    if (msg == "__chName") {
+    /*account operations*/
+    if (msg == "__chAccount") {
         error_code ec;
-        char buf[1024];
-    
-        size_t length = socket_->read_some(asio::buffer(buf),ec);
-        if(ec){
-            ERROR_LOG("ERROR_Temp_account", "error reading");
-            AccountFactory::free_id.push_back(this->getId());
-            accountBase.erase(this->getId());
-            return;
-        }
-
-        string name_(buf, length);
-        this->userName_ = name_;
-
-        reading();
-    }
-    //Change password
-    else if (msg == "__chPaswd") {
-        error_code ec;
-        char buf[1024];
-
-        //old password
-        size_t length = socket_->read_some(asio::buffer(buf), ec);
+        char subBuf[1024];
+        
+        size_t length = socket_->read_some(asio::buffer(subBuf), ec);
         if (ec) {
             ERROR_LOG("ERROR_Temp_account", "error reading");
+            this->status_ = deleted;
             AccountFactory::free_id.push_back(this->getId());
             accountBase.erase(this->getId());
             return;
         }
+        msg = string(subBuf, length);
 
-        string _password(buf, length);
-        _password = Hash(_password);
-        if (this->password_ != _password) {
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(1) }),ec);
+        //Change user name
+        if (msg == "__chName") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
             if (ec) {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
-                AccountFactory::free_id.push_back(this->getId());
-                accountBase.erase(this->getId());
-                return;
-            }
-            reading();
-            return;
-        }
-        else {
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(0) }),ec);
-            if (ec) {
-                ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
                 AccountFactory::free_id.push_back(this->getId());
                 accountBase.erase(this->getId());
                 return;
             }
 
-            length = socket_->read_some(asio::buffer(buf), ec);
-            if (ec) {
-                ERROR_LOG("ERROR_Temp_account", "error reading");
-                AccountFactory::free_id.push_back(this->getId());
-                accountBase.erase(this->getId());
-                return;
-            }
-
-            _password = string(buf, length);
-            this->password_ = Hash(_password);
+            msg = string(subBuf, length);
+            this->userName_ = msg;
             
             reading();
-            return;
         }
-    }
-    //exit
-    else if (msg == "__exit") {
-        error_code ec;
-        char buf[10];
+        //Change password
+        else if (msg == "__chPaswd") {
+            //old password
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
 
-        socket_->cancel();
-        size_t length = socket_->read_some(asio::buffer(buf), ec);
-        if (ec) {
-            ERROR_LOG("ERROR_Temp_account", "error reading");
-            AccountFactory::free_id.push_back(this->getId());
-            accountBase.erase(this->getId());
-            return;
+            msg = string(subBuf, length);
+            if (this->password_ == Hash(msg)) {
+                //new password
+                length = socket_->read_some(asio::buffer(subBuf), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
+                    AccountFactory::free_id.push_back(this->getId());
+                    accountBase.erase(this->getId());
+                    return;
+                }
+
+                msg = string(subBuf, length);
+                this->password_ = Hash(msg);
+
+                //successful password change
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
+                    AccountFactory::free_id.push_back(this->getId());
+                    accountBase.erase(this->getId());
+                    return;
+                }
+                reading();
+                return;
+            }
+            else {
+                //password entered is incorrect
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
+                    AccountFactory::free_id.push_back(this->getId());
+                    accountBase.erase(this->getId());
+                    return;
+                }
+                reading();
+                return;
+            }
         }
+        //exit
+        else if (msg == "__exit") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (ec) {
+                acDEBUG_LOG("ERROR_Temp_account", "delete account");
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
 
-        if (string(buf, length) == "__Y") {
-            acDEBUG_LOG("ERROR_Temp_account", "delete account");
-            AccountFactory::free_id.push_back(this->getId());
-            accountBase.erase(this->getId());
+            if (string(subBuf, length) == "__Y") {
+                acDEBUG_LOG("ERROR_Temp_account", "delete account");
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+            else {
+                acDEBUG_LOG("ERROR_Temp_account", "don't delete account");
+
+                reading();
+                return;
+            }
         }
         else {
-            acDEBUG_LOG("ERROR_Temp_account", "don't delete account");
             reading();
+            return;
         }
     }
+    /*chat operations*/
+    else if (msg == "__chat") {
+        error_code ec;
+        char subBuf[1024];
+
+        size_t length = socket_->read_some(asio::buffer(subBuf), ec);
+        if (ec) {
+            ERROR_LOG("ERROR_Temp_account", "error reading");
+            this->status_ = deleted;
+            AccountFactory::free_id.push_back(this->getId());
+            accountBase.erase(this->getId());
+            return;
+        }
+        msg = string(subBuf, length);
+        
+        //add chat
+        if (msg == "__addChat") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+
+            for (int i = 0; i < length; i++) {
+                if (!isdigit(subBuf[i])) {
+                    acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
+
+                    reading();
+                    return;
+                }
+            }
+
+            uint64_t ID(stoi(string(subBuf, length)));
+            if (chatManager.addSoloChat(ID,this->socket_) == 1) {
+                acDEBUG_LOG("DEBUG_Temp_account", "invalid ID");
+
+                //incorrect id entered
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
+                    AccountFactory::free_id.push_back(this->getId());
+                    accountBase.erase(this->getId());
+                    return;
+                }
+
+                reading();
+                return;
+            }
+            acDEBUG_LOG("DEBUG_Temp_account", "user added");
+
+            //successful client addition
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+
+            reading();
+        }
+        else if (msg == "__selectChat") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            for (int i = 0; i < length; i++) {
+                if (!isdigit(subBuf[i])) {
+                    acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
+
+                    reading();
+                    return;
+                }
+            }
+
+            uint32_t index(stoi(string(subBuf, length)));
+            if (chatManager.setChatIndex(index) == 1) {
+                acDEBUG_LOG("DEBUG_Temp_account", "error chat index");
+
+                //incorrect index entered
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::IOerror) }), ec);
+                if (ec) {
+                    ERROR_LOG("ERROR_Temp_account", "error reading");
+                    this->status_ = deleted;
+                    AccountFactory::free_id.push_back(this->getId());
+                    accountBase.erase(this->getId());
+                    return;
+                }
+                reading();
+                return;
+            }
+
+            //seccessful select chat
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+            reading();
+        }
+        else {
+            reading();
+            return;
+        }
+    }
+    /*msg output*/
     else {
+        if (chatManager.printChat(string("${" + to_string(this->getId()) + '}' + '[' + this->getUserName() + ']' + msg + '\n')) == 2) {
+            error_code ec;
+
+            //attempt to send a message to a remote account
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::msgInDeleteACcount) }), ec);
+            if (ec) {
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
+                return;
+            }
+        }
         reading();
     }
 }
@@ -149,6 +295,9 @@ void TempAccount::info() const
     cout << "\033[38;5;250;48;5;23m____Temp account____\n";
     Account::info();
 }
+//The temporary account will be deleted after logging out, there is no need to archive messages
+void TempAccount::bufferingMsg(string& msg){ }
+void TempAccount::outBuffer(){ }
 
 
 //operators

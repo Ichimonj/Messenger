@@ -1,4 +1,14 @@
 #include "AccountBase.hpp"
+#include "Accounts.hpp"
+
+AccountBase::AccountBase()
+{
+    abDEBUG_LOG("DEBUG_Account_base", "AccountBase()")
+};
+AccountBase::~AccountBase()
+{
+    abDEBUG_LOG("DEBUG_Account_base", "~AccountBase()")
+};
 
 void AccountBase::insert(userPtr&& user)
 {

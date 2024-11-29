@@ -1,6 +1,6 @@
 #pragma once
-#include "Accounts.hpp"
 #include "map"
+#include "AbstractAccount.hpp"
 typedef shared_ptr<Account> userPtr;
 typedef map<uint64_t, userPtr> userSet;
 
@@ -8,8 +8,8 @@ typedef map<uint64_t, userPtr> userSet;
 class AccountBase
 {
 public:
-    AccountBase()   { abDEBUG_LOG("DEBUG_Account_base", "AccountBase()") };
-    ~AccountBase()  { abDEBUG_LOG("DEBUG_Account_base", "~AccountBase()") };
+    AccountBase();
+    ~AccountBase();
 
     void    insert(userPtr&& user);
     void    erase(uint64_t ID);
