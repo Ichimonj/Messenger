@@ -74,8 +74,8 @@ public:
 	void printChat			(const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket) override;
 	void generateUID		(const uint64_t userID) override;
 	uint8_t addUserGroupChat(const shared_ptr<Account> user)override;
-	const size_t getCountUser()const override { return correspondents_.size(); }
-	const auto	 getCorrespondent(const size_t num) { return correspondents_[num]; }
+	const size_t getCountUser()const override;
+	const shared_ptr<Account> getCorrespondent(const size_t num);
 private:
 	vector<shared_ptr<Account>> correspondents_; 
 };

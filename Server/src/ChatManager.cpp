@@ -253,3 +253,16 @@ uint8_t GroupChat::addUserGroupChat(const shared_ptr<Account> user)
     correspondents_.push_back(user);
     return funct_return::message::successful;
 }
+
+const size_t GroupChat::getCountUser() const
+{
+    return this->correspondents_.size();
+}
+
+const shared_ptr<Account> GroupChat::getCorrespondent(const size_t num)
+{
+    if (num > correspondents_.size() - 1) {
+        return nullptr;
+    }
+    return correspondents_[num];
+}
