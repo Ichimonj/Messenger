@@ -20,8 +20,8 @@ public:
 	void reading() 	override;
 	void print() 	const override;
 	void info() 	const override;
-	void bufferingMsg(string& msg)	override;
-	void outBuffer()				override;
+	void bufferingMsg(const string& msg)override;
+	void outBuffer()					override;
 
 private:
 	void read_handler(const char* buf, const size_t length);

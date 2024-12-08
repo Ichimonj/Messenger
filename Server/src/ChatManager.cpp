@@ -1,75 +1,253 @@
 #include "ChatManager.hpp"
 #include "AccountBase.hpp"
 #include "Preprocessor.hpp"
-ChatManager::ChatManager()
+#include"ServerError.hpp"
+/*CHAT MANAGER*/
+int ChatManager::printChat(string&& msg, const shared_ptr<asio::ip::tcp::socket> socket)
 {
-}
-
-int ChatManager::addSoloChat(uint64_t ID,shared_ptr<asio::ip::tcp::socket> socket)
-{
-    shared_ptr<Account> user = accountBase.findUser(ID);
-    if (user != nullptr) {
-        cmDEBUG_LOG("DEBUG_Chat_manager", "add user in chat");
-        soloChat.insert({ user->getId(),user });
-
-        string msg = string("@{" + to_string(user->getId()) + '}' + '[' + user->getUserName() + ']');
-        socket->write_some(asio::buffer(msg.data(), msg.length()));
+    if (correspondence == nullptr) {
+        msg = msg.substr(msg.find_first_of('['), msg.back());
+        favoriteMessages.push_back(msg);
         return 0;
     }
     else {
-        cmDEBUG_LOG("DEBUG_Chat_manager", "user not find");
+        correspondence->printChat("#(" + correspondence->chatUID + ")" + msg, socket);
+    }                             
+    return 0;
+}
+
+int ChatManager::setChatIndex(const string& chatUID)
+{
+    auto user = chats.find(chatUID);
+    if (user == chats.end()) {
         return 1;
+    }
+    else {
+        correspondence = user->second;
+    }
+    return 0;
+}
+
+int ChatManager::createSoloChat(const uint64_t ID, const shared_ptr<Account> creator)
+{
+    cmDEBUG_LOG("ChatManager", "addSoloChat");
+
+    auto user = accountBase.findUser(ID);
+    if (user == nullptr) {
+        return 1;
+    }
+    else {
+        shared_ptr<SoloChat> chat = make_shared<SoloChat>(user);
+        chat->generateUID(creator->getId());
+        string chatInformMsg = string("#(" + chat->chatUID + ")${" + to_string(user->getId()) + "}[" + user->getUserName() + ']');
+        creator->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));      //message to sender
+
+        chatInformMsg = string("#(" + chat->chatUID + ")${" + to_string(creator->getId()) + "}[" + creator->getUserName() + ']');
+        user->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));  //message to the interlocutor
+        chats.insert({ chat->chatUID,chat });
+
+        return 0;
     }
 }
 
-int ChatManager::printChat(string&& msg)
+int ChatManager::createGroupChat(const uint64_t ID, const shared_ptr<Account> creator)
 {
-    if (correspondent != nullptr) {
-        error_code ec;
-        correspondent->getSocket()->write_some(asio::buffer(msg.data(), msg.length()), ec);
-        if (ec) {
-            ERROR_LOG("ERROR_Chat_manager", ec.message());
+    cmDEBUG_LOG("ChatManager", "addGroupChat");
 
-            if (correspondent->getStatus() == deleted) {
-                ERROR_LOG("ERROR_Chat_manager", "Account deleted");
-                soloChat.erase(correspondent->getId());
-                this->correspondent = nullptr;
-                return 2;
+    auto user = accountBase.findUser(ID);
+    if (user == nullptr) {
+        return 1;
+    }
+    else { 
+        shared_ptr<GroupChat> chat = make_shared<GroupChat>(user);
+        chat->generateUID(creator->getId());
+
+        string chatInformMsg = string("#(" + chat->chatUID + ")${" + to_string(user->getId()) + "}[" + user->getUserName() + ']');
+        creator->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));      //message to sender             
+        chatInformMsg = string("#(" + chat->chatUID + ")${" + to_string(creator->getId()) + "}[" + creator->getUserName() + ']');
+        user->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));  //message to the interlocutor
+        chats.insert({ chat->chatUID,chat });        
+        
+        return 0;
+    }
+}
+
+int ChatManager::addUserGroupChat(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator)
+{
+    cmDEBUG_LOG("ChatManager", "addUserGroupChat");
+
+    auto user = accountBase.findUser(ID);
+    if (user == nullptr) {
+        return funct_return::message::noUser;
+    }
+    auto chat = chats.find(chatUID);
+    if (chat == chats.end()) {
+        return funct_return::message::noChat;
+    }
+    uint8_t result = chat->second->addUserGroupChat(user);
+    if (result == funct_return::message::successful) {
+        string chatInformMsg = string("#(" + chat->second->chatUID + ")");
+        string newUserInform = chatInformMsg + string("@{" + to_string(user->getId()) + "}[" + user->getUserName() + ']');
+        
+        creator->getSocket()->write_some(asio::buffer(newUserInform.data(), newUserInform.length())); //message to sender
+
+        shared_ptr<GroupChat> groupChat = static_pointer_cast<GroupChat>(chat->second);
+        for (int i = 0; i < chat->second->getCountUser(); i++) {
+            if (groupChat->getCorrespondent(i)->getId() != ID) {
+                auto chatUser = groupChat->getCorrespondent(i);
+                chatInformMsg += string("${" + to_string(chatUser->getId()) + "}[" + chatUser->getUserName() + ']');
+
+                chatUser->getSocket()->write_some(asio::buffer(newUserInform.data(), newUserInform.length()));
             }
-            else if(correspondent->getStatus() == offline){
-                cmDEBUG_LOG("DEBUG_Chat_manager", "buffering msg");
-                correspondent->bufferingMsg(msg);
-                return 0;
-            }
+        }
+        chatInformMsg += string("${" + to_string(creator->getId()) + "}[" + creator->getUserName() + ']');
+        user->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));
+    }
+
+    return result;
+}
+
+int ChatManager::addSoloChat(const string& chatUID, const uint64_t ID)
+{
+    if (chats.find(chatUID) != chats.end()) {
+        cmDEBUG_LOG("ChatManager", "already a chat")
             return 1;
+    }
+    auto user = accountBase.findUser(ID);
+    if (user == nullptr) {
+        return funct_return::message::noChat;
+    }
+
+    shared_ptr<SoloChat> chat = make_shared<SoloChat>(chatUID, user);
+    chats.insert({ chat->chatUID,chat });
+    return funct_return::message::successful;
+}
+
+int ChatManager::addGroupChat(const string& chatUID, const vector<uint64_t> IDs)
+{
+    if (chats.find(chatUID) != chats.end()) { 
+        cmDEBUG_LOG("ChatManager","already a chat")
+        return 1; 
+    }
+
+    vector<shared_ptr<Account>> users;
+    for (auto& ID : IDs) {
+        auto user = accountBase.findUser(ID);
+        if (user != nullptr) {
+            users.push_back(user);
         }
     }
-    else {
-        return 2;
+    if (users.empty()) {
+        return funct_return::message::noUser;
     }
-    return 0;
+    shared_ptr<GroupChat> chat = make_shared<GroupChat>(chatUID, users);
+    chats.insert({ chat->chatUID,chat });
+    return funct_return::message::successful;
 }
-
-int ChatManager::setChatIndex(uint64_t index)
+void ChatManager::bufferingMsg(const string& msg)
 {
-    auto user = soloChat.find(index);
-    if (user == soloChat.end()) {
-        cmDEBUG_LOG("DEBUG_Chat_manager", "error chat index");
-        return 1;
-    }
-    else {
-        correspondent = user->second;
-    }
-    return 0;
-}
-
-void ChatManager::bufferingMsg(string& msg)
-{
-    cmDEBUG_LOG("DEBUG_Chat_manager", "buffering msg");
-    this->bufferMsg.push_back(msg);
+    this->msgBuffer.push_back(msg);
 }
 
 vector<string> ChatManager::getBuffer()
 {
-    return this->bufferMsg;
+    return msgBuffer;
+}
+
+/*SOLO CHAT*/
+void SoloChat::printChat(const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket) {
+    cmDEBUG_LOG("SoloChat", "printChat");
+
+    error_code ec;
+    correspondent_->getSocket()->write_some(asio::buffer(msg.data(), msg.length()), ec);
+    if (ec) {
+        if (correspondent_->getStatus() == status::deleted) {
+            string errorMsg = string("%{" + to_string(correspondent_->getId()) + "}[" + correspondent_->getUserName() + "]Del");
+            socket->async_write_some(asio::buffer(errorMsg.data(), errorMsg.length()), [&](const error_code& ec, size_t) {});
+        }
+        else if (correspondent_->getStatus() == status::offline) {
+            correspondent_->bufferingMsg(msg);
+        }
+        else {
+            string errorMsg = string("%{" + to_string(correspondent_->getId()) + "}[" + correspondent_->getUserName() + "]IOerror");
+            socket->async_write_some(asio::buffer(errorMsg.data(), errorMsg.length()), [&](const error_code& ec, size_t) {});
+        }
+    }
+}
+
+void SoloChat::generateUID(const uint64_t userID)
+{
+    chatUID[0] = '0';
+    string _userID = to_string(userID);
+    string hashID = Hash(_userID);
+    for (int i = 1; i < 33; i++) {
+        chatUID[i] = hashID[i];
+    }
+    for (int i = 33; i < 128; i++) {
+        chatUID[i] = rand() % 133 + 42;
+    }
+    for (int i = 1; i < 128; i++) {
+        if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
+            chatUID[i] += 1; // Прибавляем 1 к символу
+        }
+    }
+}
+int SoloChat::addUserGroupChat(const shared_ptr<Account> user)
+{
+    return funct_return::message::addUserToSoloChat;
+}
+/*GROUP CHAT*/
+void GroupChat::printChat(const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket){
+    cmDEBUG_LOG("GroupChat", "printChat");
+
+    error_code ec;
+    for (auto& ex : correspondents_) {
+        ex->getSocket()->write_some(asio::buffer(msg.data(), msg.length()), ec);
+        if (ec) {
+            if (ex->getStatus() == status::deleted) {
+                string errorMsg = string("%{" + to_string(ex->getId()) + "}[" + ex->getUserName() + "]Del");
+                socket->async_write_some(asio::buffer(errorMsg.data(), errorMsg.length()), [&](const error_code& ec, size_t) {});
+                auto deletedUser = find(correspondents_.begin(), correspondents_.end(), ex);
+                if (deletedUser != correspondents_.end()) {
+                    correspondents_.erase(deletedUser);
+                }
+            }
+            else if (ex->getStatus() == status::offline) {
+                ex->bufferingMsg(msg);
+            }
+            else {
+                string errorMsg = string("%{" + to_string(ex->getId()) + "}[" + ex->getUserName() + "]IOerror");
+                socket->async_write_some(asio::buffer(errorMsg.data(), errorMsg.length()), [&](const error_code& ec, size_t) {});
+            }
+        }
+    }
+}
+
+void GroupChat::generateUID(const uint64_t userID)
+{
+    chatUID[0] = '1';
+    string _userID = to_string(userID);
+    string hashID = Hash(_userID);
+    for (int i = 1; i < 33; i++) {
+        chatUID[i] = hashID[i];
+    }
+    for (int i = 33; i < 128; i++) {
+        chatUID[i] = rand() % 133 + 42;
+    }
+    for (int i = 1; i < 128; i++) {
+        if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
+            chatUID[i] += 1; // Прибавляем 1 к символу
+        }
+    }
+}
+
+int GroupChat::addUserGroupChat(const shared_ptr<Account> user)
+{
+    cmDEBUG_LOG("GroupChat", "addUserGroupChat");
+    auto _user = find(correspondents_.begin(), correspondents_.end(), user);
+    if (_user != correspondents_.end()) {
+        return funct_return::message::alreadyUser;
+    }
+    correspondents_.push_back(user);
+    return funct_return::message::successful;
 }

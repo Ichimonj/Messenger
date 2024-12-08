@@ -4,5 +4,9 @@ namespace funct_return {
 		successful,
 		IOerror,
 		msgInDeleteACcount,
+		noUser,
+		noChat,
+		addUserToSoloChat,
+		alreadyUser
 	};
 }

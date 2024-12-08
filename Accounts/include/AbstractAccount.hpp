@@ -36,7 +36,7 @@ public:
 	virtual void reading() 	= 0;
 	virtual void print() 	const;
 	virtual void info() 	const;
-	virtual void bufferingMsg(string& msg) = 0;
+	virtual void bufferingMsg(const string& msg) = 0;
 	virtual void outBuffer() = 0;
 
 
