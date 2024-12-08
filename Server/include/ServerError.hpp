@@ -7,6 +7,7 @@ namespace funct_return {
 		noUser,
 		noChat,
 		addUserToSoloChat,
-		alreadyUser
+		alreadyUser,
+		alreadyChat
 	};
 }

@@ -3,38 +3,37 @@
 #include "Preprocessor.hpp"
 #include"ServerError.hpp"
 /*CHAT MANAGER*/
-int ChatManager::printChat(string&& msg, const shared_ptr<asio::ip::tcp::socket> socket)
+uint8_t ChatManager::printChat(string&& msg, const shared_ptr<asio::ip::tcp::socket> socket)
 {
     if (correspondence == nullptr) {
         msg = msg.substr(msg.find_first_of('['), msg.back());
         favoriteMessages.push_back(msg);
-        return 0;
     }
     else {
         correspondence->printChat("#(" + correspondence->chatUID + ")" + msg, socket);
     }                             
-    return 0;
+    return funct_return::message::successful;
 }
 
-int ChatManager::setChatIndex(const string& chatUID)
+uint8_t ChatManager::setChatIndex(const string& chatUID)
 {
-    auto user = chats.find(chatUID);
-    if (user == chats.end()) {
-        return 1;
+    auto chat = chats.find(chatUID);
+    if (chat == chats.end()) {
+        return funct_return::message::noChat;
     }
     else {
-        correspondence = user->second;
+        correspondence = chat->second;
     }
-    return 0;
+    return funct_return::message::successful;
 }
 
-int ChatManager::createSoloChat(const uint64_t ID, const shared_ptr<Account> creator)
+uint8_t ChatManager::createSoloChat(const uint64_t ID, const shared_ptr<Account> creator)
 {
     cmDEBUG_LOG("ChatManager", "addSoloChat");
 
     auto user = accountBase.findUser(ID);
     if (user == nullptr) {
-        return 1;
+        return funct_return::message::noUser;
     }
     else {
         shared_ptr<SoloChat> chat = make_shared<SoloChat>(user);
@@ -46,17 +45,17 @@ int ChatManager::createSoloChat(const uint64_t ID, const shared_ptr<Account> cre
         user->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));  //message to the interlocutor
         chats.insert({ chat->chatUID,chat });
 
-        return 0;
+        return funct_return::message::successful;
     }
 }
 
-int ChatManager::createGroupChat(const uint64_t ID, const shared_ptr<Account> creator)
+uint8_t ChatManager::createGroupChat(const uint64_t ID, const shared_ptr<Account> creator)
 {
     cmDEBUG_LOG("ChatManager", "addGroupChat");
 
     auto user = accountBase.findUser(ID);
     if (user == nullptr) {
-        return 1;
+        return funct_return::message::noUser;
     }
     else { 
         shared_ptr<GroupChat> chat = make_shared<GroupChat>(user);
@@ -68,11 +67,11 @@ int ChatManager::createGroupChat(const uint64_t ID, const shared_ptr<Account> cr
         user->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));  //message to the interlocutor
         chats.insert({ chat->chatUID,chat });        
         
-        return 0;
+        return funct_return::message::successful;
     }
 }
 
-int ChatManager::addUserGroupChat(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator)
+uint8_t ChatManager::addUserGroupChat(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator)
 {
     cmDEBUG_LOG("ChatManager", "addUserGroupChat");
 
@@ -85,6 +84,7 @@ int ChatManager::addUserGroupChat(const uint64_t ID, const string& chatUID, cons
         return funct_return::message::noChat;
     }
     uint8_t result = chat->second->addUserGroupChat(user);
+
     if (result == funct_return::message::successful) {
         string chatInformMsg = string("#(" + chat->second->chatUID + ")");
         string newUserInform = chatInformMsg + string("@{" + to_string(user->getId()) + "}[" + user->getUserName() + ']');
@@ -107,15 +107,16 @@ int ChatManager::addUserGroupChat(const uint64_t ID, const string& chatUID, cons
     return result;
 }
 
-int ChatManager::addSoloChat(const string& chatUID, const uint64_t ID)
+uint8_t ChatManager::addSoloChat(const string& chatUID, const uint64_t ID)
 {
     if (chats.find(chatUID) != chats.end()) {
-        cmDEBUG_LOG("ChatManager", "already a chat")
-            return 1;
+        cmDEBUG_LOG("ChatManager", "already a chat");
+        return funct_return::message::alreadyChat;
     }
+
     auto user = accountBase.findUser(ID);
     if (user == nullptr) {
-        return funct_return::message::noChat;
+        return funct_return::message::noUser;
     }
 
     shared_ptr<SoloChat> chat = make_shared<SoloChat>(chatUID, user);
@@ -123,11 +124,11 @@ int ChatManager::addSoloChat(const string& chatUID, const uint64_t ID)
     return funct_return::message::successful;
 }
 
-int ChatManager::addGroupChat(const string& chatUID, const vector<uint64_t> IDs)
+uint8_t ChatManager::addGroupChat(const string& chatUID, const vector<uint64_t> IDs)
 {
     if (chats.find(chatUID) != chats.end()) { 
         cmDEBUG_LOG("ChatManager","already a chat")
-        return 1; 
+        return funct_return::message::alreadyChat; 
     }
 
     vector<shared_ptr<Account>> users;
@@ -140,6 +141,7 @@ int ChatManager::addGroupChat(const string& chatUID, const vector<uint64_t> IDs)
     if (users.empty()) {
         return funct_return::message::noUser;
     }
+
     shared_ptr<GroupChat> chat = make_shared<GroupChat>(chatUID, users);
     chats.insert({ chat->chatUID,chat });
     return funct_return::message::successful;
@@ -192,7 +194,7 @@ void SoloChat::generateUID(const uint64_t userID)
         }
     }
 }
-int SoloChat::addUserGroupChat(const shared_ptr<Account> user)
+uint8_t SoloChat::addUserGroupChat(const shared_ptr<Account> user)
 {
     return funct_return::message::addUserToSoloChat;
 }
@@ -241,7 +243,7 @@ void GroupChat::generateUID(const uint64_t userID)
     }
 }
 
-int GroupChat::addUserGroupChat(const shared_ptr<Account> user)
+uint8_t GroupChat::addUserGroupChat(const shared_ptr<Account> user)
 {
     cmDEBUG_LOG("GroupChat", "addUserGroupChat");
     auto _user = find(correspondents_.begin(), correspondents_.end(), user);

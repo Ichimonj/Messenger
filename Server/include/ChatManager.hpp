@@ -13,14 +13,14 @@ public:
 	ChatManager() {};
 	~ChatManager() {};
 
-	int printChat		(string&& msg, shared_ptr<asio::ip::tcp::socket> socket);
-	int setChatIndex	(const string& chatUID);
-	int createSoloChat	(const uint64_t ID, const shared_ptr<Account> creator);
-	int createGroupChat	(const uint64_t ID, const shared_ptr<Account> creator);
-	int addUserGroupChat(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator);
+	uint8_t printChat		(string&& msg, shared_ptr<asio::ip::tcp::socket> socket);
+	uint8_t setChatIndex	(const string& chatUID);
+	uint8_t createSoloChat	(const uint64_t ID, const shared_ptr<Account> creator);
+	uint8_t createGroupChat	(const uint64_t ID, const shared_ptr<Account> creator);
+	uint8_t addUserGroupChat(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator);
 
-	int addSoloChat		(const string& chatUID,const uint64_t ID);
-	int addGroupChat	(const string& chatUID,const vector<uint64_t> IDs);
+	uint8_t addSoloChat		(const string& chatUID,const uint64_t ID);
+	uint8_t addGroupChat	(const string& chatUID,const vector<uint64_t> IDs);
 
 	void bufferingMsg	(const string& msg);
 
@@ -42,7 +42,7 @@ public:
 	virtual void		 printChat		 (const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket) = 0;
 	//chatType(0 - soloChat, 1-groupChat)
 	virtual void		 generateUID	 (const uint64_t userID) = 0;
-	virtual int			 addUserGroupChat(const shared_ptr<Account> user) = 0;
+	virtual uint8_t		 addUserGroupChat(const shared_ptr<Account> user) = 0;
 	virtual const size_t getCountUser() const = 0;
 	string chatUID;
 private:
@@ -55,9 +55,9 @@ public:
 		:Chat(chatUID), correspondent_(user) {}
 
 public:
-	void printChat		 (const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket)override;
-	void generateUID	 (const uint64_t userID)override;
-	int  addUserGroupChat(const shared_ptr<Account> user)override;
+	void	printChat		(const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket) override;
+	void	generateUID		(const uint64_t userID)override;
+	uint8_t addUserGroupChat(const shared_ptr<Account> user)override;
 	const size_t getCountUser()const override { return 1; }
 
 private:
@@ -71,9 +71,9 @@ public:
 		:Chat(chatUID), correspondents_(users) {}
 
 public:
-	void printChat		 (const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket)override;
-	void generateUID	 (const uint64_t userID) override;
-	int  addUserGroupChat(const shared_ptr<Account> user)override;
+	void printChat			(const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket) override;
+	void generateUID		(const uint64_t userID) override;
+	uint8_t addUserGroupChat(const shared_ptr<Account> user)override;
 	const size_t getCountUser()const override { return correspondents_.size(); }
 	const auto	 getCorrespondent(const size_t num) { return correspondents_[num]; }
 private:
