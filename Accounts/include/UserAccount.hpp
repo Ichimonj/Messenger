@@ -25,6 +25,7 @@ public:
 
 private:
 	void read_handler(const char* buf, const size_t length);
+	bool checkError(const error_code& ec);
 
 public:
 	friend ostream &operator<<(ostream &os, const UserAccount &ex);

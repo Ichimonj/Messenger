@@ -3,6 +3,8 @@ namespace funct_return {
 	{
 		successful,
 		IOerror,
+		wrongPassword,
+		wrongPhoneNumber,
 		msgInDeleteACcount,
 		noUser,
 		noChat,
