@@ -113,11 +113,15 @@ void UserAccount::read_handler(const char* buf, const size_t length)
 
                 this->phoneNumber_ = phoneNumber;
                 socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+                if (checkError(ec)) return;
+
             }
             else {
                 acDEBUG_LOG("DEBUG_User_account", "Phone number not valid");
 
                 socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongPhoneNumber) }), ec);
+                if (checkError(ec)) return;
+
             }
             reading();
             return;
