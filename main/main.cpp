@@ -1,12 +1,12 @@
 #include <iostream>
-//#include "version.hpp" //generated
+#include "version.hpp" //generated
 #include "Server.hpp"
 using namespace std;
 
 int main(int argc,char* argv[])
 {
     setlocale(LC_ALL, "ru");
-    //cout << "BUILD VERSION - " << version << endl;
+    cout << "BUILD VERSION - " << version << endl;
 
     uint8_t threadSize = 12;
     if (argc > 1) {

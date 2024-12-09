@@ -364,7 +364,6 @@ void UserAccount::outBuffer()
 {
     for (auto& ex : chatManager.getBuffer()) {
         this->socket_->write_some(asio::buffer(ex.data(), ex.length()));
-        Sleep(300);
     }
 }
 
