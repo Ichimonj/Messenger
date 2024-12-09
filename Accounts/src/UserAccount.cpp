@@ -137,12 +137,26 @@ void UserAccount::read_handler(const char* buf, const size_t length)
                 this->status_ = offline;
                 return;
             }
-            else {
-                acDEBUG_LOG("ERROR_Temp_account", "don't log out of account");
+            acDEBUG_LOG("ERROR_Temp_account", "don't log out of account");
 
-                reading();
+            reading();
+            return;
+        }
+        //delete
+        else if (msg == "__delete") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (checkError(ec)) return;
+
+            if (string(subBuf, length) == "__Y") {
+                acDEBUG_LOG("ERROR_Temp_account", "delete account");
+                this->socket_->close();
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
                 return;
             }
+            reading();
+            return;
         }
         else {
             reading();
