@@ -215,6 +215,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
 
             if (length != 128) {
                 acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
                 reading();
                 return;
             }
@@ -271,6 +272,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
 
             if (length != 128) {
                 acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
                 reading();
                 return;
             }
@@ -303,6 +305,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
 
             if (length != 128) {
                 acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
                 reading();
                 return;
             }
@@ -321,6 +324,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
 
             if (length != 128) {
                 acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
                 reading();
                 return;
             }
