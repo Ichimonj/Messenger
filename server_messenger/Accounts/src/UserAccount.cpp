@@ -385,6 +385,13 @@ void UserAccount::outBuffer()
     }
 }
 
+const string UserAccount::getAccountData() const
+{
+    string data = dynamic_cast<const Account&>(*this).getAccountData();
+    data += this->emale_ + '\n' + this->phoneNumber_.getNumber();
+    return data;
+}
+
 //operators
 ostream &operator<<(ostream &os, const UserAccount &ex)
 {

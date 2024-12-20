@@ -31,6 +31,8 @@ public:
 	const string 	getUserName() 	const;
 	const string	getPassword()	const;
 	const status 	getStatus() 	const;
+
+	virtual const string getAccountData() const;
 	const shared_ptr<asio::ip::tcp::socket>	getSocket()	const;
 
 	virtual void reading() 	= 0;

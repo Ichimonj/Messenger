@@ -1,5 +1,5 @@
 #include "AccountFactory.hpp"
-
+#include "ServerError.hpp"
 //important: version without encryption
 atomic<uint64_t> AccountFactory::count = 0;
 vector<uint64_t> AccountFactory::free_id{};
@@ -99,7 +99,6 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
 void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, error_code& ec)
 {
     afDEBUG_LOG("DEBUG_account_factory", "login");
-
     char buf[1024];
 
     size_t lenght = socket->read_some(asio::buffer(buf), ec);
@@ -113,7 +112,14 @@ void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, err
 
     uint64_t ID = stoi(string(buf, lenght));
     auto user = accountBase.findUser(ID);
-    if (user == nullptr) { EXCEPTIONS_LOG("Account_factory", "account not found"); return; }
+    if (user == nullptr) {
+        EXCEPTIONS_LOG("Account_factory", "account not found");
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::noUser)}), ec);
+        return; 
+    }
+    else {
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+    }
 
     lenght = socket->read_some(asio::buffer(buf), ec);        
     if (ec) { EXCEPTIONS_LOG("Account_factory - ", ec.message()); return; }
@@ -126,5 +132,11 @@ void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, err
         else { user->outBuffer(); }
 
         afDEBUG_LOG("DEBUG_account_factory", string("successful login account ID - " + to_string(ID)));
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+        string accountData = user->getAccountData();
+        socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec);
+    }
+    else {
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongPassword) }), ec);
     }
 }

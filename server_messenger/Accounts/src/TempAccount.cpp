@@ -326,6 +326,11 @@ void TempAccount::info() const
 void TempAccount::bufferingMsg(const string& msg){ }
 void TempAccount::outBuffer(){ }
 
+const string TempAccount::getAccountData() const
+{
+    return dynamic_cast<const Account&>(*this).getAccountData();
+}
+
 
 //operators
 ostream &operator<<(ostream &os, const TempAccount &ex)
