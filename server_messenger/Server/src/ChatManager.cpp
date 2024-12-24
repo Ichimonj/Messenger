@@ -196,7 +196,7 @@ void SoloChat::generateUID(const uint64_t userID)
     chatUID+=(SSLrand(96));
     for (int i = 1; i < 128; i++) {
         if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
-            chatUID[i] += 1; // ���������� 1 � �������
+            chatUID[i] += 1; 
         }
     }
 }
@@ -241,7 +241,7 @@ void GroupChat::generateUID(const uint64_t userID)
     chatUID += (SSLrand(96));
     for (int i = 1; i < 128; i++) {
         if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
-            chatUID[i] += 1; // ���������� 1 � �������
+            chatUID[i] += 1;
         }
     }
 }
