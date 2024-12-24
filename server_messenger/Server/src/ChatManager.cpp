@@ -18,6 +18,9 @@ uint8_t ChatManager::printChat(string&& msg, const shared_ptr<asio::ip::tcp::soc
 
 uint8_t ChatManager::setChatIndex(const string& chatUID)
 {
+    if (chatUID.size() == 1) {
+        correspondence = nullptr;
+    }
     auto chat = chats.find(chatUID);
     if (chat == chats.end()) {
         return funct_return::message::noChat;
@@ -31,19 +34,24 @@ uint8_t ChatManager::setChatIndex(const string& chatUID)
 uint8_t ChatManager::createSoloChat(const uint64_t ID, const shared_ptr<Account> creator)
 {
     cmDEBUG_LOG("ChatManager", "addSoloChat");
-
+    
+    error_code ec;
     auto user = accountBase.findUser(ID);
     if (user == nullptr) {
+        creator->getSocket()->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::noUser) }), ec);
         return funct_return::message::noUser;
     }
     else {
+        error_code ec;
+        creator->getSocket()->write_some(asio::buffer({static_cast<unsigned char>(funct_return::message::successful)}), ec);
+        Sleep(100);
         shared_ptr<SoloChat> chat = make_shared<SoloChat>(user);
         chat->generateUID(creator->getId());
         string chatInformMsg = string("#(" + chat->chatUID + ")${" + to_string(user->getId()) + "}[" + user->getUserName() + ']');
-        creator->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));      //message to sender
+        creator->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));       //message to sender
 
         chatInformMsg = string("#(" + chat->chatUID + ")${" + to_string(creator->getId()) + "}[" + creator->getUserName() + ']');
-        user->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));  //message to the interlocutor
+        user->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));          //message to the interlocutor
         chats.insert({ chat->chatUID,chat });
 
         return funct_return::message::successful;
@@ -188,7 +196,7 @@ void SoloChat::generateUID(const uint64_t userID)
     chatUID+=(SSLrand(96));
     for (int i = 1; i < 128; i++) {
         if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
-            chatUID[i] += 1; // Прибавляем 1 к символу
+            chatUID[i] += 1; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         }
     }
 }
@@ -233,7 +241,7 @@ void GroupChat::generateUID(const uint64_t userID)
     chatUID += (SSLrand(96));
     for (int i = 1; i < 128; i++) {
         if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
-            chatUID[i] += 1; // Прибавляем 1 к символу
+            chatUID[i] += 1; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 1 пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         }
     }
 }
