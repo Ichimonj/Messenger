@@ -11,6 +11,7 @@ namespace funct_return {
 		addUserToSoloChat,
 		alreadyUser,
 		alreadyChat,
-		wrongUID
+		wrongUID,
+		wrongID
 	};
 }
