@@ -30,14 +30,20 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
 
     char buf[1024];
 
-    size_t lenght = socket->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);   //user name
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
-    string _userName(buf, lenght);
+    string _userName(buf, length);
 
-    lenght = socket->read_some(asio::buffer(buf), ec);
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
-    string _password(buf, lenght);
+
+    length = socket->read_some(asio::buffer(buf), ec);          //password
+    if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
+    string _password(buf, length);
     _password = Hash(_password);
+
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+    if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
 
     uint64_t ID;
     mtAssignmentId.lock();
@@ -53,32 +59,54 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     mtAccountInsert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation temp account ID - "+to_string(ID)));
+    string accountData = to_string(ID) + '\n' + _userName;
+    socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec);
 }
 
 //Accounts/include/UserAccount.hpp
-void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket, error_code &ec)
+void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket, error_code& ec)
 {
-    afDEBUG_LOG("DEBUG_account_factory", "make_temp_account");
+    afDEBUG_LOG("DEBUG_account_factory", "make_no_temp_account");
 
     char buf[1024];
 
-    size_t lenght = socket->read_some(asio::buffer(buf),ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);    //User name
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
-    string _userName(buf, lenght);
+    string _userName(buf, length);
 
-    lenght = socket->read_some(asio::buffer(buf),ec);
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
-    string _password(buf, lenght);
+
+    length = socket->read_some(asio::buffer(buf), ec);           //Password
+    if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
+    string _password(buf, length);
     _password = Hash(_password);
 
-    lenght = socket->read_some(asio::buffer(buf),ec);
-    if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
-    string _emale(buf, lenght);
-
-    lenght = socket->read_some(asio::buffer(buf),ec);
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
 
-    PhoneNumber _phoneNumber(string(buf, lenght));
+    length = socket->read_some(asio::buffer(buf), ec);           //emale
+    if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
+    string _email(buf, length);
+
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+    if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
+
+    length = socket->read_some(asio::buffer(buf), ec);           //Phone number
+    if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
+
+    PhoneNumber _phoneNumber(string(buf, length));
+    while (!_phoneNumber.isValid()) {
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongPhoneNumber) }), ec);
+        if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
+
+        length = socket->read_some(asio::buffer(buf), ec);      //Phone number
+        if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
+
+        _phoneNumber.setNumber(string(buf, length));
+    }
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+    if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
 
     uint64_t ID;
     mtAssignmentId.lock();
@@ -90,10 +118,12 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
     mtAssignmentId.unlock();
 
     mtAccountInsert.lock();
-    accountBase.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _emale, _phoneNumber));
+    accountBase.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _email, _phoneNumber));
     mtAccountInsert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation user account ID - " + to_string(ID)));
+    string accountData = to_string(ID) + '\n' + _userName + '\n' + _email + '\n' + _phoneNumber.getNumber();
+    socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec);
 }
 
 void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, error_code& ec)
@@ -101,42 +131,47 @@ void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, err
     afDEBUG_LOG("DEBUG_account_factory", "login");
     char buf[1024];
 
-    size_t lenght = socket->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);   //ID
     if (ec) { EXCEPTIONS_LOG("EXCEPTIONS_account_factory", ec.message()); return; }
 
-    for (int i = 0; i < lenght; i++) {
+    for (int i = 0; i < length; i++) {
         if (!isdigit(buf[i])) {
             return;
         }
     }
 
-    uint64_t ID = stoi(string(buf, lenght));
+    uint64_t ID = stoi(string(buf, length));
     auto user = accountBase.findUser(ID);
     if (user == nullptr) {
         EXCEPTIONS_LOG("Account_factory", "account not found");
         socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::noUser)}), ec);
-        return; 
+        return;
     }
     else {
         socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+        if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
     }
 
-    lenght = socket->read_some(asio::buffer(buf), ec);        
+    length = socket->read_some(asio::buffer(buf), ec);        //password
     if (ec) { EXCEPTIONS_LOG("Account_factory - ", ec.message()); return; }
 
-    string _password(buf, lenght);
+    string _password(buf, length);
     _password = Hash(_password);
 
     if (user->getPassword() == _password) {
-        if (user->login(socket) == 1) { EXCEPTIONS_LOG("Account_factory", "account is already taken"); }
+        if (user->login(socket) == 1) { EXCEPTIONS_LOG("Account_factory", "account is already taken"); return; }
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+
+        string accountData = user->getAccountData();
+        socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec);
+        if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
         else { user->outBuffer(); }
 
         afDEBUG_LOG("DEBUG_account_factory", string("successful login account ID - " + to_string(ID)));
-        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
-        string accountData = user->getAccountData();
-        socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec);
+        if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
     }
     else {
         socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongPassword) }), ec);
+        if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
     }
 }
