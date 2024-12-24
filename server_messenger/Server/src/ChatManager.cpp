@@ -1,7 +1,8 @@
 #include "ChatManager.hpp"
 #include "AccountBase.hpp"
 #include "Preprocessor.hpp"
-#include"ServerError.hpp"
+#include "ServerError.hpp"
+#include"Rand.hpp"
 /*CHAT MANAGER*/
 uint8_t ChatManager::printChat(string&& msg, const shared_ptr<asio::ip::tcp::socket> socket)
 {
@@ -179,15 +180,12 @@ void SoloChat::printChat(const string&& msg, const shared_ptr<asio::ip::tcp::soc
 
 void SoloChat::generateUID(const uint64_t userID)
 {
-    chatUID[0] = '0';
+    chatUID.push_back('0');
     string _userID = to_string(userID);
     string hashID = Hash(_userID);
-    for (int i = 1; i < 33; i++) {
-        chatUID[i] = hashID[i];
-    }
-    for (int i = 33; i < 128; i++) {
-        chatUID[i] = rand() % 133 + 42;
-    }
+
+    chatUID += (string(hashID, 33));
+    chatUID+=(SSLrand(96));
     for (int i = 1; i < 128; i++) {
         if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
             chatUID[i] += 1; // Прибавляем 1 к символу
@@ -227,15 +225,12 @@ void GroupChat::printChat(const string&& msg, const shared_ptr<asio::ip::tcp::so
 
 void GroupChat::generateUID(const uint64_t userID)
 {
-    chatUID[0] = '1';
+    chatUID.push_back('1');
     string _userID = to_string(userID);
     string hashID = Hash(_userID);
-    for (int i = 1; i < 33; i++) {
-        chatUID[i] = hashID[i];
-    }
-    for (int i = 33; i < 128; i++) {
-        chatUID[i] = rand() % 133 + 42;
-    }
+
+    chatUID += (string(hashID, 33));
+    chatUID += (SSLrand(96));
     for (int i = 1; i < 128; i++) {
         if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
             chatUID[i] += 1; // Прибавляем 1 к символу

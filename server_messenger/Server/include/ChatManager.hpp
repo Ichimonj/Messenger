@@ -4,6 +4,7 @@
 #include"map"
 #include"asio.hpp"
 #include"Hash.hpp"
+
 class Chat;
 class SoloChat;
 class GroupChat;
@@ -34,7 +35,7 @@ private:
 
 class Chat {
 public:
-	Chat() { chatUID.resize(128); }
+	Chat() {};
 	Chat(const string& chatUID) :chatUID(chatUID) {};
 	
 	virtual ~Chat() {};
