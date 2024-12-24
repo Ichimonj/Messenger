@@ -25,7 +25,8 @@ const status Account::getStatus()   const { return this->status_; }
 
 const string Account::getAccountData() const
 {
-    string data = to_string(this->ID_) + '\n' + this->userName_ + '\n' + this->password_ + '\n';
+    string data = to_string(this->ID_) + '\n' + this->userName_  + '\n';
+    return data;
 }
 
 const shared_ptr<asio::ip::tcp::socket> Account::getSocket()     const { return this->socket_; }
