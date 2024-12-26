@@ -92,7 +92,7 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             }
         }
         //Change emale
-        else if (msg == "__chEmale") {
+        else if (msg == "__chEmail") {
             length = socket_->read_some(asio::buffer(subBuf), ec);
             if (checkError(ec)) return;
 
