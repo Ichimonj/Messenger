@@ -80,9 +80,9 @@ uint8_t ChatManager::createGroupChat(const uint64_t ID, const shared_ptr<Account
     }
 }
 
-uint8_t ChatManager::addUserGroupChat(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator)
+uint8_t ChatManager::inviteUserGroupChat(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator)
 {
-    cmDEBUG_LOG("ChatManager", "addUserGroupChat");
+    cmDEBUG_LOG("ChatManager", "inviteUserGroupChat");
 
     auto user = accountBase.findUser(ID);
     if (user == nullptr) {
@@ -113,6 +113,26 @@ uint8_t ChatManager::addUserGroupChat(const uint64_t ID, const string& chatUID, 
         user->getSocket()->write_some(asio::buffer(chatInformMsg.data(), chatInformMsg.length()));
     }
 
+    return result;
+}
+
+uint8_t ChatManager::addUserGroupChat(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator)
+{
+
+    cmDEBUG_LOG("ChatManager", "inviteUserGroupChat");
+
+    auto user = accountBase.findUser(ID);
+    if (user == nullptr) {
+        cout << "no user" << endl;
+        return funct_return::message::noUser;
+    }
+    auto chat = chats.find(chatUID);
+    if (chat == chats.end()) {
+        cout << "no chat" << endl;
+        return funct_return::message::noChat;
+    }
+    uint8_t result = chat->second->addUserGroupChat(user);
+    
     return result;
 }
 

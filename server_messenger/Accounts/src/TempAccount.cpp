@@ -101,12 +101,26 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 this->status_ = offline;
                 return;
             }
-            else {
-                acDEBUG_LOG("ERROR_Temp_account", "don't log out of account");
+            acDEBUG_LOG("ERROR_Temp_account", "don't log out of account");
 
-                reading();
+            reading();
+            return;
+        }
+        //delete
+        else if (msg == "__delete") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (checkError(ec)) return;
+
+            if (string(subBuf, length) == "__Y") {
+                acDEBUG_LOG("ERROR_Temp_account", "delete account");
+                this->socket_->close();
+                this->status_ = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                accountBase.erase(this->getId());
                 return;
             }
+            reading();
+            return;
         }
         else {
             reading();
@@ -132,15 +146,14 @@ void TempAccount::read_handler(const char* buf, const size_t length)
                 if (!isdigit(subBuf[i])) {
                     acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
 
+                    socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongID) }), ec);
                     reading();
                     return;
                 }
             }
 
             uint64_t ID(stoi(string(subBuf, length)));
-            uint8_t result = chatManager.createSoloChat(ID, accountBase.findUser(this->ID_));
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
-            if (checkError(ec)) return;
+            chatManager.createSoloChat(ID, accountBase.findUser(this->ID_));
 
             reading();
             return;
@@ -236,6 +249,38 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             reading();
             return;
         }
+        else if (msg == "__inviteUserGroupChat") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (checkError(ec)) return;
+
+            for (int i = 0; i < length; i++) {
+                if (!isdigit(subBuf[i])) {
+                    acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
+
+                    reading();
+                    return;
+                }
+            }
+            uint64_t ID(stoi(string(subBuf, length)));
+
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (checkError(ec)) return;
+
+            if (length != 128) {
+                acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
+                reading();
+                return;
+            }
+            string chatUID = (string(subBuf, length));
+
+            uint8_t addUserResult = chatManager.inviteUserGroupChat(ID, chatUID, accountBase.findUser(this->ID_));
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(addUserResult) }), ec);
+            if (checkError(ec)) return;
+
+            reading();
+            return;
+        }
         else if (msg == "__addUserGroupChat") {
             length = socket_->read_some(asio::buffer(subBuf), ec);
             if (checkError(ec)) return;
@@ -272,6 +317,12 @@ void TempAccount::read_handler(const char* buf, const size_t length)
             length = socket_->read_some(asio::buffer(subBuf), ec);
             if (checkError(ec)) return;
 
+            if (length == 1) {
+                chatManager.setChatIndex("0");
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+                reading();
+                return;
+            }
             if (length != 128) {
                 acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
                 socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
@@ -298,7 +349,6 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         reading();
     }
 }
-
 bool TempAccount::checkError(const error_code& ec)
 {
     if (ec) {

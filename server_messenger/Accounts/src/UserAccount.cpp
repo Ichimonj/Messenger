@@ -182,15 +182,14 @@ void UserAccount::read_handler(const char* buf, const size_t length)
                 if (!isdigit(subBuf[i])) {
                     acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
 
+                    socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongID) }),ec);
                     reading();
                     return;
                 }
             }
 
             uint64_t ID(stoi(string(subBuf, length)));
-            uint8_t result = chatManager.createSoloChat(ID, accountBase.findUser(this->ID_));
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
-            if (checkError(ec)) return;
+            chatManager.createSoloChat(ID, accountBase.findUser(this->ID_));
 
             reading();
             return;
@@ -286,6 +285,38 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             reading();
             return;
         }
+        else if (msg == "__inviteUserGroupChat") {
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (checkError(ec)) return;
+
+            for (int i = 0; i < length; i++) {
+                if (!isdigit(subBuf[i])) {
+                    acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
+
+                    reading();
+                    return;
+                }
+            }
+            uint64_t ID(stoi(string(subBuf, length)));
+
+            length = socket_->read_some(asio::buffer(subBuf), ec);
+            if (checkError(ec)) return;
+
+            if (length != 128) {
+                acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
+                reading();
+                return;
+            }
+            string chatUID = (string(subBuf, length));
+
+            uint8_t addUserResult = chatManager.inviteUserGroupChat(ID, chatUID, accountBase.findUser(this->ID_));
+            socket_->write_some(asio::buffer({ static_cast<unsigned char>(addUserResult) }), ec);
+            if (checkError(ec)) return;
+
+            reading();
+            return;
+        }
         else if (msg == "__addUserGroupChat") {
             length = socket_->read_some(asio::buffer(subBuf), ec);
             if (checkError(ec)) return;
@@ -322,6 +353,12 @@ void UserAccount::read_handler(const char* buf, const size_t length)
             length = socket_->read_some(asio::buffer(subBuf), ec);
             if (checkError(ec)) return;
 
+            if (length == 1) {
+                chatManager.setChatIndex("0");
+                socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+                reading();
+                return;
+            }
             if (length != 128) {
                 acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
                 socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);

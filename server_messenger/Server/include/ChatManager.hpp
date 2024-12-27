@@ -18,7 +18,8 @@ public:
 	uint8_t setChatIndex	(const string& chatUID);
 	uint8_t createSoloChat	(const uint64_t ID, const shared_ptr<Account> creator);
 	uint8_t createGroupChat	(const uint64_t ID, const shared_ptr<Account> creator);
-	uint8_t addUserGroupChat(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator);
+	uint8_t inviteUserGroupChat	(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator);
+	uint8_t addUserGroupChat	(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator);
 
 	uint8_t addSoloChat		(const string& chatUID,const uint64_t ID);
 	uint8_t addGroupChat	(const string& chatUID,const vector<uint64_t> IDs);
