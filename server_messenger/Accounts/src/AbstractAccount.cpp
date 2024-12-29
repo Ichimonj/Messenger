@@ -22,6 +22,13 @@ const uint64_t Account::getId()     const { return this->ID_; }
 const string Account::getUserName() const { return this->userName_; }
 const string Account::getPassword() const { return this->password_; }
 const status Account::getStatus()   const { return this->status_; }
+
+const string Account::getAccountData() const
+{
+    string data = to_string(this->ID_) + '\n' + this->userName_  + '\n';
+    return data;
+}
+
 const shared_ptr<asio::ip::tcp::socket> Account::getSocket()     const { return this->socket_; }
 
 //other member functions

@@ -13,8 +13,7 @@ Server::~Server()
 
 void Server::start_accept()
 {
-    svDEBUG_LOG("DEBUG_Server", "start_accept()");
-    cout << "Starting to accept connections..." << endl;
+    svDEBUG_LOG("DEBUG_Server", "Starting to accept connections...");
 
     auto socket = make_shared<asio::ip::tcp::socket>(*context_);
 
@@ -22,7 +21,7 @@ void Server::start_accept()
         {
             if (!ec)
             {
-                cout << "New client connected!" << endl;
+                svDEBUG_LOG("DEBUG_Server", "New client connected!");
                 thread([this, socket]() {add_client(socket); }).detach();
             }
             else

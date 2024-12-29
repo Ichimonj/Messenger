@@ -36,6 +36,6 @@ private:
     bool isValid_ = false;
 
     uint16_t countryCode_       = 0;
-    uint16_t operatorCode_       = 0;
+    uint16_t operatorCode_      = 0;
     uint32_t subscriberNumber_  = 0;
 };
