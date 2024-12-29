@@ -1,0 +1,4 @@
+#define LANGUAGE_EN 0
+#define LANGUAGE_RU 1
+
+#define CURRENT_LANGUAGE LANGUAGE_RU
