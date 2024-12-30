@@ -43,12 +43,18 @@ User::User(const uint64_t ID, const string name)
 	:ID(ID), name(name) {
 }
 
-Message::Message(string msg, User user)
+User::User(const shared_ptr<User> user)
+{
+	this->ID	= user->ID;
+	this->name	= user->name;
+}
+
+Message::Message(string msg, shared_ptr<User> user)
 	:message(msg), user(user) {
 };
 ostream& operator<<(ostream& os, const Message& ex){
 	size_t FILL = 15;
-	os << setw(FILL) << left << setfill('_') << to_string(ex.user.ID) + " - " + ex.user.name << ex.message.c_str();
+	os << setw(FILL) << left << setfill('_') << to_string(ex.user->ID) + " - " + ex.user->name << ex.message.c_str();
 	return os;
 }
 
@@ -104,12 +110,13 @@ void Chat::msgBuffering(const Message msg){
 }
 
 SoloChat::SoloChat(const string& chatUID, const User& user)
-	:Chat(chatUID), correspondent_(user) {
+	:Chat(chatUID) {
+	this->correspondent_ = make_shared<User>(user);
 }
 
 const string SoloChat::chatName() const{
 	if (this->getChatName().size() == 0) {
-		return this->correspondent_.name;
+		return this->correspondent_->name;
 	}
 	else {
 		return this->getChatName();
@@ -120,27 +127,27 @@ const bool SoloChat::isUserAvailable(uint64_t ID) const{
 	return true;
 }
 
-GroupChat::GroupChat(const string& chatUID, const User& user)
-	:Chat(chatUID), correspondents_() {
-	this->correspondents_.insert({ user.ID,user });
+GroupChat::GroupChat(const string& chatUID, const shared_ptr<User> user)
+	:Chat(chatUID),correspondents_() {
+	this->correspondents_.insert({ user->ID,user });
 }
 
-GroupChat::GroupChat(const string& chatUID, const vector<User>& users)
-	:Chat(chatUID) {
+GroupChat::GroupChat(const string& chatUID, const vector<shared_ptr<User>> users)
+	:Chat(chatUID),correspondents_() { 
 	for (auto& user : users) {
-		correspondents_.insert({ user.ID,user });
+		correspondents_.insert({ user->ID,user });
 	}
 }
 
-void GroupChat::addUser(User user){
-	this->correspondents_.insert({ user.ID,user });
+void GroupChat::addUser(shared_ptr<User> user){
+	this->correspondents_.insert({ user->ID,user });
 }
 
 const string GroupChat::chatName() const{
 	if (this->getChatName().size() == 0) {
 		string chatName;
 		for (auto& user : this->correspondents_) {
-			chatName += user.second.name;
+			chatName += user.second->name;
 			chatName += ", ";
 		}
 		chatName.resize(chatName.size() - 2);
@@ -372,7 +379,7 @@ void ChatManager::selectChat(shared_ptr<asio::ip::tcp::socket> socket){
 	stop();
 }
 
-void ChatManager::changeUrName(const string& name) { you.name = name; }
+void ChatManager::changeUrName(const string& name) { you->name = name; }
 
 void ChatManager::exitChat(){
 	if (activeChat_ != nullptr) {
@@ -388,11 +395,9 @@ void ChatManager::readHandler(string msg, shared_ptr<asio::ip::tcp::socket> sock
 		auto chat = chats_.find(chatUID);
 		if (chat == chats_.end()) {
 			if (chatUID[0] == '0') {
-				cout << "create solo chat" << endl;
 				addSoloChat(chatUID, msg, socket);
 			}
 			else if (chatUID[0] == '1') {
-				cout << "create group chat" << endl;
 				addGroupChat(chatUID, msg, socket);
 			}
 			else {
@@ -408,10 +413,8 @@ void ChatManager::readHandler(string msg, shared_ptr<asio::ip::tcp::socket> sock
 			size_t endName = msg.find_first_of(']');
 			string name = msg.substr(startName + 1, endName - startName - 1);
 
-			User user(ID, name);
 			if (chatUID[0] == '0') {
-				Message message(msg.substr(endName + 1, msg.back()), user);
-				chat->second->msgBuffering(message);
+				chat->second->receivingMsg(msg.substr(endName + 1, msg.back()), ID, name);
 			}
 			else {
 				if (!chat->second->isUserAvailable(ID)) {
@@ -420,8 +423,7 @@ void ChatManager::readHandler(string msg, shared_ptr<asio::ip::tcp::socket> sock
 					}
 				}
 				else {
-					Message message(msg.substr(endName + 1, msg.back()), user);
-					chat->second->msgBuffering(message);
+					chat->second->receivingMsg(msg.substr(endName + 1, msg.back()), ID, name);
 				}
 			}
 		}
@@ -463,7 +465,7 @@ void ChatManager::addSoloChat(const string& UID, string& msg, shared_ptr<asio::i
 }
 
 void ChatManager::addGroupChat(const string& UID, string& msg, shared_ptr<asio::ip::tcp::socket> socket){
-	vector<User> users;
+	vector<shared_ptr<User>> users;
 	string IDs;
 	while (msg.find_last_of('$') != string::npos) {
 		size_t startID = msg.find_last_of('{');
@@ -473,7 +475,7 @@ void ChatManager::addGroupChat(const string& UID, string& msg, shared_ptr<asio::
 		size_t startName = msg.find_last_of('[');
 		size_t endName = msg.find_last_of(']');
 		string name = msg.substr(startName + 1, endName - startName - 1);
-		users.push_back(User(ID, name));
+		users.push_back(make_shared<User>(ID, name));
 		IDs += to_string(ID);
 		IDs += ' ';
 		msg.resize(msg.find_last_of('$'));

@@ -16,9 +16,9 @@ void Console::help()
 {
 	size_t FILL = 18;
 #if(CURRENT_LANGUAGE  == LANGUAGE_RU)
-	system("cls");
-	print("[--account | -a]", "Операции с вашим аккаунтом\n", FILL);
-	print("[--chats   | -c]", "Операции с чатами.\n", FILL);
+	system("cls");	
+	print("[--account | -a]", "РћРїРµСЂР°С†РёРё СЃ Р°РєРєР°СѓРЅС‚РѕРј.\n", FILL);
+	print("[--chats   | -c]", "РћРїРµСЂР°С†РёРё СЃ С‡Р°С‚РѕРј.\n", FILL);
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 	system("cls");
 	print("[--account | -a]", "Operations with your account\n", FILL);
@@ -39,8 +39,8 @@ void Console::accountType()
 	size_t FILL = 20;
 #if(CURRENT_LANGUAGE  == LANGUAGE_RU)
 	system("cls");
-	print("[--temp    | -t]", "Временный аккаунт, он будет удален после выхода\n", FILL);
-	print("[--no temp | -nt]", "Регулярный аккаунт, для регистрации потребуется больше данных, но он не будет удален после выхода\n", FILL);
+	print("[--temp    | -t]", "Р’СЂРµРјРµРЅРЅС‹Р№ Р°РєРєР°СѓРЅС‚, РѕРЅ Р±СѓРґРµС‚ СѓРґР°Р»РµРЅ РїРѕСЃР»Рµ РІС‹С…РѕРґР°\n", FILL);
+	print("[--no temp | -nt]", "Р РµРіСѓР»СЏСЂРЅС‹Р№ Р°РєРєР°СѓРЅС‚, РґР»СЏ СЂРµРіРёСЃС‚СЂР°С†РёРё РїРѕС‚СЂРµР±СѓРµС‚СЃСЏ Р±РѕР»СЊС€Рµ РґР°РЅРЅС‹С…, РЅРѕ РѕРЅ РЅРµ Р±СѓРґРµС‚ СѓРґР°Р»РµРЅ РїРѕСЃР»Рµ РІС‹С…РѕРґР°.\n", FILL);
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 	system("cls");
 	print("[--temp    | -t]", "Temporary account, it will be deleted after logout\n", FILL);
@@ -50,16 +50,16 @@ void Console::accountType()
 
 void Console::accountOperation()
 {
-	size_t FILL = 30;
+	size_t FILL = 27;
 #if(CURRENT_LANGUAGE  == LANGUAGE_RU)
 	system("cls");
-	print("[--ch name   | -chn]", "Изменить имя пользователя\n", FILL);
-	print("[--ch passwd | -chp]", "Изменить пароль\n", FILL);
-	print("[--ch email  | -che]", "Изменить почту\n", FILL);
-	print("[--ch phone number | -chpn]", "Изменить номер телефона\n", FILL);
-	print("[--exit]", "Выйти\n", FILL);
-	print("[--delete]", "Удалить аккаунт\n", FILL);
-	print("[--back]", "Вернутся назад\n", FILL);
+	print("[--ch name   | -chn]", "РР·РјРµРЅРёС‚СЊ РёРјСЏ\n", FILL);
+	print("[--ch passwd | -chp]", "РР·РјРµРЅРёС‚СЊ РїР°СЂРѕР»СЊ\n", FILL);
+	print("[--ch email  | -che]", "РР·РјРµРЅРёС‚СЊ РїРѕС‡С‚Сѓ\n", FILL);
+	print("[--ch phone number | -chpn]", "РР·РјРµРЅРёС‚СЊ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°\n", FILL);
+	print("[--exit]", "Р’С‹С…РѕРґ\n", FILL);
+	print("[--delete]", "РЈРґР°Р»РёС‚СЊ Р°РєРєР°СѓРЅС‚\n", FILL);
+	print("[--back]", "Р’РµСЂРЅСѓС‚СЊСЃСЏ РЅР°Р·Р°Рґ\n", FILL);
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 	system("cls");
 	print("[--ch name   | -chn]", "Change username\n", FILL);
@@ -79,7 +79,7 @@ void Console::chats(map<string, shared_ptr<Chat>> chats)
 	string first;
 	string second;
 #if(CURRENT_LANGUAGE  == LANGUAGE_RU)
-	cout << "0-избранные сообщения\n";
+	cout << "0-РР·Р±СЂР°РЅРЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ\n";
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 	cout << "0-favorite messages\n";
 #endif 
@@ -102,14 +102,14 @@ void Console::chats(map<string, shared_ptr<Chat>> chats)
 
 void Console::chatsHelp(map<string, shared_ptr<Chat>> chats)
 {
-	size_t FILL = 35;
+	size_t FILL = 25;
 	system("cls");
 #if(CURRENT_LANGUAGE  == LANGUAGE_RU)
-	print("[--make Schat | -msc]", "Добавить персональный чат\n", FILL);
-	print("[--make Gchat | -mgc]", "Добавить групповой чат\n", FILL);
-	print("[--invite user | -iu]", "добавить пользователя в групповой чат\n", FILL);
-	print("[--select | -s]", "Выбрать чат из ниже перечисленных\n", FILL);
-	print("[--back]", "Вернутся назад\n", FILL);
+	print("[--make Schat | -msc]", "Р”РѕР±Р°РІРёС‚СЊ РїРµСЂСЃРѕРЅР°Р»СЊРЅС‹Р№ С‡Р°С‚\n", FILL);
+	print("[--make Gchat | -mgc]", "Р”РѕР±Р°РІРёС‚СЊ РіСЂСѓРїРїРѕРІРѕР№ С‡Р°С‚\n", FILL);
+	print("[--invite user | -iu]", "Р”РѕР±Р°РІРёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РІ РіСЂСѓРїРїРѕРІРѕР№ С‡Р°С‚\n", FILL);
+	print("[--select | -s]", "Р’С‹Р±СЂР°С‚СЊ С‡Р°С‚ РёР· СЃРїРёСЃРєР° РЅРёР¶Рµ\n", FILL);
+	print("[--back]", "Р’РµСЂРЅСѓС‚СЊСЃСЏ РЅР°Р·Р°Рґ\n", FILL);
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 	print("[--make Schat | -msc]", "Add personal chat\n", FILL);
 	print("[--make Gchat | -mgc]", "Add group chat\n", FILL);
@@ -119,3 +119,4 @@ void Console::chatsHelp(map<string, shared_ptr<Chat>> chats)
 #endif 
 	Console::chats(chats);
 }
+

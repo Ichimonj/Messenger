@@ -2,6 +2,7 @@
 #include"Console.hpp"
 #include"stack"
 #include"Error.hpp"
+#include<iostream>
 asio::io_context context;
 
 shared_ptr<asio::ip::tcp::socket> socket_;
@@ -225,10 +226,9 @@ shared_ptr<Account> login() {
 }
 
 int main(int argc,char* argv[]) {
+
 	shared_ptr<Account> account;
 #ifdef _DEBUG
-
-	setlocale(LC_ALL, "ru");
 	socket_ = make_shared<asio::ip::tcp::socket>(context);
 	socket_->connect(endpoint);
 
@@ -285,7 +285,6 @@ int main(int argc,char* argv[]) {
 #endif // DEBUG
 
 account->setSocket(socket_);
-
 Console::help();
 account->read();
 

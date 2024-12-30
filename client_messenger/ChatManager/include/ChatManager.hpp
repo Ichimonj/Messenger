@@ -12,6 +12,7 @@ void stop();
 
 struct User {
 	User(const uint64_t ID, const string name);
+	User(const shared_ptr<User> user);
 
 	uint64_t ID;
 	string   name;
@@ -19,11 +20,11 @@ struct User {
 
 struct Message
 {
-	Message(string msg, User user);
+	Message(string msg, shared_ptr<User> user);
 
 	friend ostream& operator<<(ostream& os, const Message& ex);
 	string message;
-	User user;
+	shared_ptr<User> user;
 };
 
 class Chat {
@@ -31,21 +32,22 @@ public:
 	Chat(const string& chatUID);
 	
 public:
-	void				setChatName(const string& chatName);
-	const vector<Message>getMsgBuffer()	const;
-	const bool			getIsActiveChat() const;
-	void				setIsActiveChat(const bool isActive);
-	const string		getChatName()	const;
-	const string		getChatUID()	const;
-	const uint32_t		getNotViewedMessage() const;
-	void				clearNotViewedMessage();
+	void				 setChatName(const string& chatName);
+	const vector<Message>getMsgBuffer()			const;
+	const bool			 getIsActiveChat()		const;
+	void				 setIsActiveChat(const bool isActive);
+	const string		 getChatName()			const;
+	const string		 getChatUID()			const;
+	const uint32_t		 getNotViewedMessage()	const;
+	void				 clearNotViewedMessage();
 
 public:
-	void printChat(size_t lineSize);
-	void msgBuffering(const Message msg);
+	void printChat			 (size_t lineSize);
+	void msgBuffering		 (const Message msg);
+	virtual void receivingMsg(const string& msg, const uint64_t ID, const string& name) = 0;
 
 public:
-	virtual void addUser(User user) = 0;
+	virtual void addUser(shared_ptr<User> user) = 0;
 	virtual const string chatName() const = 0;
 
 	virtual const bool isUserAvailable(uint64_t ID) const = 0;
@@ -65,33 +67,55 @@ public:
 	SoloChat(const string& chatUID, const User& user);
 
 public:
-	void addUser(User user)override {}
-
+	void addUser(shared_ptr<User> user)override {}
 	const string chatName() const override;
-
 	const bool isUserAvailable(uint64_t ID) const override;
 
 private:
-	User correspondent_;
+	void receivingMsg(const string& msg, const uint64_t ID, const string& name) {
+		if (correspondent_->ID != ID) {
+			cout << "unknown client got into your chat" << endl;
+			abort();
+		}
+		if (correspondent_->name != name) {
+			correspondent_->name = name;
+		}
+		msgBuffering(Message(msg, correspondent_));
+	}
+private:
+	shared_ptr<User> correspondent_;
 };
 class GroupChat : public Chat {
 public:
-	GroupChat(const string& chatUID, const User& user);
-	GroupChat(const string& chatUID, const vector<User>& users);
+	GroupChat(const string& chatUID, const shared_ptr<User> user);
+	GroupChat(const string& chatUID, const vector<shared_ptr<User>> users);
 
 public:
-	void			addUser(User user)override;
+	void			addUser(shared_ptr<User> user)override;
 	const string	chatName() const override;
 	const bool		isUserAvailable(uint64_t ID) const override;
 
 private:
-	map<uint64_t,User>correspondents_;
+	void receivingMsg(const string& msg, const uint64_t ID, const string& name) {
+		auto user = correspondents_.find(ID);
+		if (user == correspondents_.end()) {
+			cout << "unknown client got into your chat" << endl;
+			abort();
+		}
+		if (user->second->name != name) {
+			user->second->name = name;
+		}
+		msgBuffering(Message(msg, user->second));
+	}
+
+private:
+	map<uint64_t, shared_ptr<User>>correspondents_;
 };
 
 class ChatManager {
 public:
-	ChatManager(uint64_t ID, const string& name)
-		:you(ID, name) {
+	ChatManager(uint64_t ID, const string& name){
+		this->you = make_shared<User>(ID, name);
 	};
 public:
 	auto getChats() { return chats_; }
@@ -127,7 +151,7 @@ private:
 	uint32_t lineSize = 30;
 	
 private:
-	User you;
+	shared_ptr<User> you;
 
 	vector<string>				  favoriteMessages_;
 	shared_ptr<Chat>			  activeChat_;
