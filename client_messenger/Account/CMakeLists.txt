@@ -20,3 +20,6 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/../Error/include
     PUBLIC D:/vs/newlibs/asio-1.18.0/include
 )
+install(TARGETS ${PROJECT_NAME}
+    DESTINATION ${PROJECT_SOURCE_DIR}/../lib
+)
