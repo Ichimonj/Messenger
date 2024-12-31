@@ -386,6 +386,10 @@ void ChatManager::exitChat(){
 		activeChat_->setIsActiveChat(false);
 	}
 }
+void ChatManager::changeLineSize(size_t lineSize)
+{
+	this->lineSize = lineSize;
+}
 void ChatManager::readHandler(string msg, shared_ptr<asio::ip::tcp::socket> socket){
 	if (msg[0] == '#') {
 		size_t startUID = msg.find_first_of('(');

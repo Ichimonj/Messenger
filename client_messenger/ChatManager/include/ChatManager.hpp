@@ -131,6 +131,8 @@ public:
 
 	void exitChat();
 
+	void changeLineSize(size_t lineSize);
+
 public:
 	void readHandler(string msg, shared_ptr<asio::ip::tcp::socket> socket);
 	void writeHandler(string msg, shared_ptr<asio::ip::tcp::socket> socket);

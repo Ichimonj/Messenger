@@ -80,6 +80,10 @@ void Account::accountOperation()
 			changePhoneNumber();
 			return;
 		}
+		else if (operation == "--line size" || operation == "-ls") {
+			changeLineSize();
+			return;
+		}
 		else if (operation == "--exit") {
 			exitAccount();
 			return;
@@ -218,6 +222,37 @@ void Account::changePhoneNumber()
 		Sleep(50);
 	}
 	stop();
+}
+
+void Account::changeLineSize()
+{
+#if(CURRENT_LANGUAGE  == LANGUAGE_RU)
+	cout << "Введите количество строк - ";
+#elif(CURRENT_LANGUAGE == LANGUAGE_EN)
+	cout << "Enter line size - ";
+#endif
+	string _lineSize;
+	size_t lineSize;
+	do {
+		safe_getline(_lineSize);
+		while (!isDigit(_lineSize)) {
+#if(CURRENT_LANGUAGE  == LANGUAGE_RU)
+			cout << "Количество строк может быть только числом - ";
+#elif(CURRENT_LANGUAGE == LANGUAGE_EN)
+			cout << "The number of lines can only be a number - ";
+#endif
+			safe_getline(_lineSize);
+		}
+		lineSize = stoi(_lineSize);
+		if (lineSize == 0) {
+#if(CURRENT_LANGUAGE  == LANGUAGE_RU)
+			cout << "не может быть 0 строк в чате - ";
+#elif(CURRENT_LANGUAGE == LANGUAGE_EN)
+			cout << "there cannot be 0 lines in the chat - "; 
+#endif
+		}
+	} while (lineSize == 0);
+	chatManager_.changeLineSize(lineSize);
 }
 
 void Account::exitAccount()

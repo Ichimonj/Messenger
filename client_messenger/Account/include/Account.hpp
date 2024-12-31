@@ -22,6 +22,7 @@ public:
 	void changePassword();
 	void changeEmail();
 	void changePhoneNumber();
+	void changeLineSize();
 	void exitAccount();
 	void deleteAccount();
 
