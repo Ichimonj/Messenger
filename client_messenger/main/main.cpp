@@ -246,12 +246,6 @@ int main(int argc,char* argv[]) {
 	account = make_shared<Account>(1, "Oleg");
 
 #else
-
-#if(CURRENT_LANGUAGE  == LANGUAGE_RU)
-	setlocale(LC_ALL, "ru");
-#elif(CURRENT_LANGUAGE == LANGUAGE_EN)
-	setlocale(LC_ALL, "en");
-#endif
 	account = login();
 	while (account == nullptr) {
 #if(CURRENT_LANGUAGE == LANGUAGE_RU)
@@ -280,7 +274,6 @@ int main(int argc,char* argv[]) {
 			abort();
 		}
 	}
-}
 
 #endif // DEBUG
 
