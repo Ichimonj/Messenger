@@ -1,0 +1,8 @@
+$ - symbol indicating the beginning of a block with user information
+
+@ - The symbol is used in ChatManager to send the user ID and name,
+so that other chat participants can see information about the user.
+
+% - information about an error sending a message to the interlocutor.
+
+# - symbol indicating the beginning of a chat message
