@@ -3,6 +3,7 @@
 #include"stack"
 #include"Error.hpp"
 #include<iostream>
+#include"version.hpp"
 asio::io_context context;
 
 shared_ptr<asio::ip::tcp::socket> socket_;
@@ -18,6 +19,7 @@ shared_ptr<Account> login() {
 	}
 	Console::loginHelp();
 
+	cout << "Version - " << version << endl;
 	string command;
 	getline(cin, command);
 	while (command != "--login" && command != "--registry" && command != "-l" && command != "-r") {
@@ -226,7 +228,6 @@ shared_ptr<Account> login() {
 }
 
 int main(int argc,char* argv[]) {
-
 	shared_ptr<Account> account;
 #ifdef _DEBUG
 	socket_ = make_shared<asio::ip::tcp::socket>(context);
@@ -274,7 +275,6 @@ int main(int argc,char* argv[]) {
 			abort();
 		}
 	}
-
 #endif // DEBUG
 
 account->setSocket(socket_);
