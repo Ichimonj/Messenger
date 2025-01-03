@@ -14,6 +14,7 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/include
     PUBLIC ${PROJECT_SOURCE_DIR}/../Console/include
+    PUBLIC ${PROJECT_SOURCE_DIR}/../Settings
 )
 install(TARGETS ${PROJECT_NAME}
     DESTINATION ${PROJECT_SOURCE_DIR}/../lib
