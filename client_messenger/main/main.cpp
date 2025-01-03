@@ -2,12 +2,71 @@
 #include"Console.hpp"
 #include"stack"
 #include"Error.hpp"
+#include"FileNames.hpp"
 #include<iostream>
+#include<fstream>
 #include"version.hpp"
+
 asio::io_context context;
 
 shared_ptr<asio::ip::tcp::socket> socket_;
 asio::ip::tcp::endpoint endpoint(asio::ip::make_address("127.0.0.1"), 8080);
+
+shared_ptr<Account> fastLogin() {
+	ifstream file;
+	file.open(login_file_name, ios::binary);
+	if (!file.is_open()) {
+		return nullptr;
+	}
+	uint64_t ID;
+	string   password;
+
+	if (!file.read(reinterpret_cast<char*>(&ID), sizeof(ID))) {
+		return nullptr;
+	}
+	size_t passwordSize;
+	if (!file.read(reinterpret_cast<char*>(&passwordSize), sizeof(passwordSize))) {
+		return nullptr;
+	}
+	password.resize(passwordSize);
+	if (!file.read(reinterpret_cast<char*>(&password),passwordSize)) {
+		return nullptr;
+	}
+	cout << ID << endl;
+	cout << password << endl;
+	error_code ec;
+	char buf[1024];
+
+	socket_->write_some(asio::buffer(string("login").data(), 5), ec);
+	Sleep(50);
+
+	socket_->write_some(asio::buffer(to_string(ID).data(), to_string(ID).size()), ec);
+	size_t length = socket_->read_some(asio::buffer(buf), ec);
+	if (static_cast<funct_return::message>(buf[0]) != funct_return::message::successful) {
+		return nullptr;
+	}
+
+	socket_->write_some(asio::buffer(password.data(), password.size()), ec);
+	length = socket_->read_some(asio::buffer(buf), ec);
+	if (static_cast<funct_return::message>(buf[0]) != funct_return::message::successful) {
+		return nullptr;
+	}
+
+	length = socket_->read_some(asio::buffer(buf), ec);
+	if (ec) {
+		return nullptr;
+	}
+
+	vector<string>accountData;
+	string in;
+	stringstream ss(string(buf, length));
+	while (getline(ss, in)) {
+		accountData.push_back(in);
+	}
+
+	shared_ptr<Account> account = make_shared<Account>(stoi(accountData[0]), accountData[1], accountData[2], accountData[3]);
+	return account;
+}
 
 shared_ptr<Account> login() {
 	error_code ec;
@@ -21,7 +80,7 @@ shared_ptr<Account> login() {
 
 	cout << "Version - " << version << endl;
 	string command;
-	getline(cin, command);
+	getline(cin,command);
 	while (command != "--login" && command != "--registry" && command != "-l" && command != "-r") {
 		Console::loginHelp();
 #if(CURRENT_LANGUAGE  == LANGUAGE_RU)
@@ -29,10 +88,24 @@ shared_ptr<Account> login() {
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 		cout << "Please enter the correct command" << endl;
 #endif 
-		getline(cin, command);
+		getline(cin,command);
 	}
 
 	if (command == "--login" || command == "-l") {
+		system("cls"); 
+		char ch = '0';
+		while (!strchr("12", ch)) {
+#if(CURRENT_LANGUAGE  == LANGUAGE_RU)
+			cout << "1 - быстрый вход\n2 - вход с паролем\n";
+#elif(CURRENT_LANGUAGE == LANGUAGE_EN)
+			cout << "1 - quick login\n2 - login with password\n";
+#endif
+			cin >> ch;
+		}
+		if (ch == '1') {
+			return fastLogin();
+		}
+
 		system("cls");
 		error_code ec;
 		char buf[1024];
@@ -216,6 +289,27 @@ shared_ptr<Account> login() {
 				accountData.push_back(in);
 			}
 			shared_ptr<Account>account = make_shared<Account>(stoi(accountData[0]), accountData[1], accountData[2], accountData[3]);
+
+			char ch = '0';
+			while (!strchr("12", ch)) {
+#if(CURRENT_LANGUAGE  == LANGUAGE_RU)
+				cout << "1 - Сохранить пароль\n2 - Не сохранять пароль\n";
+#elif(CURRENT_LANGUAGE == LANGUAGE_EN)
+				cout << "1 - Save password\n2 - Do not save password\n"; 
+#endif
+				cin >> ch;
+			}
+			if (ch == '1') {
+				account->setPassword(password);
+				if (account->serializationLogin() == 1) {
+#if(CURRENT_LANGUAGE  == LANGUAGE_RU)
+					cout << "Не удалось сохранить данные для входа\n";
+#elif(CURRENT_LANGUAGE == LANGUAGE_EN)
+					cout << "Failed to save login information\n";
+#endif
+					stop();
+				}
+			}
 			return account;
 		}
 		else {
@@ -255,6 +349,7 @@ int main(int argc,char* argv[]) {
 		cout << "1 - Try again\n2 - Quit\n";
 #endif
 		char ch;
+		cin.ignore();
 		cin >> ch;
 		while (!strchr("12", ch)) {
 			system("cls");

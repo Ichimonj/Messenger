@@ -3,17 +3,31 @@
 #include "Console.hpp"
 #include "Error.hpp"
 #include "Command.hpp"
+#include "FileNames.hpp"
+#include <fstream>
+
 Account::Account(const uint64_t ID, const string& userName)
-	:ID_(ID), userName_(userName), email_(""), phoneNumber_(""), password_(""), chatManager_(ID_, userName) {
+	:ID_	 (ID),		userName_	(userName), 
+	email_	 (""),		phoneNumber_(""), 
+	password_(""),		chatManager_(ID_, userName)
+{
 }
 
 Account::Account(const uint64_t ID, const string& userName, const string& email, const string& phoneNumber)
-	:ID_(ID), userName_(userName), email_(email), phoneNumber_(phoneNumber), password_(""), chatManager_(ID_, userName) {
+	:ID_	 (ID),		userName_	(userName), 
+	email_	 (email),	phoneNumber_(phoneNumber), 
+	password_(""),		chatManager_(ID_, userName)
+{
 }
 
 void Account::setSocket(const shared_ptr<asio::ip::tcp::socket> socket)
 {
 	this->socket_ = socket;
+}
+
+void Account::setPassword(const string& password)
+{
+	this->password_ = password;
 }
 
 void Account::read()
@@ -263,6 +277,7 @@ void Account::exitAccount()
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 	cout << "1 - Log out\n2 - Don't log out\n";
 #endif
+	cin.ignore();
 	cin >> ch;
 	while (!strchr("12", ch)) {
 #if(CURRENT_LANGUAGE  == LANGUAGE_RU)
@@ -270,6 +285,7 @@ void Account::exitAccount()
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 		cout << "1 - Log out\n2 - Don't log out\n";
 #endif
+		cin.ignore();
 		cin >> ch;
 	}
 	if (ch == '1') {
@@ -295,6 +311,7 @@ void Account::deleteAccount()
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 	cout << "1 - Delete account\n2 - Do not delete account\n";
 #endif
+	cin.ignore();
 	cin >> ch;
 	while (!strchr("12", ch)) {
 #if(CURRENT_LANGUAGE  == LANGUAGE_RU)
@@ -302,6 +319,7 @@ void Account::deleteAccount()
 #elif(CURRENT_LANGUAGE == LANGUAGE_EN)
 		cout << "1 - Delete account\n2 - Do not delete account\n";
 #endif
+		cin.ignore();
 		cin >> ch;
 	}
 
@@ -330,4 +348,19 @@ void Account::deleteAccount()
 	else {
 		return;
 	}
+}
+
+uint8_t Account::serializationLogin()
+{
+	ofstream file;
+	file.open(login_file_name, ios::binary);
+	if (!file.is_open()) {
+		return 1;
+	}
+	size_t sizePassword = this->password_.size();
+
+	file.write(reinterpret_cast<char*>(&this->ID_), sizeof(this->ID_));
+	file.write(reinterpret_cast<char*>(&sizePassword),sizeof(size_t));
+	file.write(password_.c_str(), password_.size());
+	return 0;
 }
