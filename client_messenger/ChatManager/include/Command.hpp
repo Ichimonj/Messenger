@@ -3,6 +3,7 @@
 #include<vector>
 using namespace std;
 namespace client_command {
+	//enumeration of commands
 	enum commands {
 		change_name,
 		change_password,
@@ -21,6 +22,7 @@ namespace client_command {
 	};
 	struct Command
 	{
+		//creating a command based on an enumeration
 		static std::vector<std::string> createCommand(client_command::commands command);
 	};
 }

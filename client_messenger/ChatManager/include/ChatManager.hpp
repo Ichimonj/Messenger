@@ -10,6 +10,7 @@ bool isDigit(string& str);
 void safe_getline(string& in);
 void stop();
 
+//User structure: used to store message sender data
 struct User {
 	User(const uint64_t ID, const string name);
 	User(const shared_ptr<User> user);
@@ -18,20 +19,24 @@ struct User {
 	string   name;
 };
 
+//Message structure: used to store messages
 struct Message
 {
 	Message(string msg, shared_ptr<User> user);
 
 	friend ostream& operator<<(ostream& os, const Message& ex);
+
 	string message;
 	shared_ptr<User> user;
 };
 
+//The chat class is used to manage chat
+//it is a virtual class for SoloChat, GroupChat
 class Chat {
 public:
 	Chat(const string& chatUID);
 	
-public:
+public:	//getters / setters
 	void				 setChatName(const string& chatName);
 	const vector<Message>getMsgBuffer()			const;
 	const bool			 getIsActiveChat()		const;
@@ -62,6 +67,7 @@ private:
 	const string	chatUID_;
 };
 
+//the SoloChat class is used to manage messages between two clients
 class SoloChat :public Chat {
 public:
 	SoloChat(const string& chatUID, const User& user);
@@ -85,6 +91,8 @@ private:
 private:
 	shared_ptr<User> correspondent_;
 };
+
+//the GroupChat class is used to manage messages between multiple clients
 class GroupChat : public Chat {
 public:
 	GroupChat(const string& chatUID, const shared_ptr<User> user);
@@ -112,14 +120,18 @@ private:
 	map<uint64_t, shared_ptr<User>>correspondents_;
 };
 
+//the ChatManager class manages all user chats
 class ChatManager {
 public:
 	ChatManager(uint64_t ID, const string& name){
 		this->you = make_shared<User>(ID, name);
 	};
+
+	//getter
 public:
 	auto getChats() { return chats_; }
 
+	//chat operation
 public:
 	void makeSoloChat	(shared_ptr<asio::ip::tcp::socket> socket);
 	void makeGroupChat	(shared_ptr<asio::ip::tcp::socket> socket);
@@ -133,14 +145,17 @@ public:
 
 	void changeLineSize(size_t lineSize);
 
+	//I/O handlers
 public:
 	void readHandler(string msg, shared_ptr<asio::ip::tcp::socket> socket);
 	void writeHandler(string msg, shared_ptr<asio::ip::tcp::socket> socket);
 
+	//add chats
 private:
 	void addSoloChat (const string& UID, string& msg, shared_ptr<asio::ip::tcp::socket> socket);
 	void addGroupChat(const string& UID, string& msg, shared_ptr<asio::ip::tcp::socket> socket);
 
+	//outputting messages from chats
 private:
 	void printChat();
 

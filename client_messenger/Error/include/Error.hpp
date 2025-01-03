@@ -2,6 +2,7 @@
 #include<iostream>
 using namespace std;
 namespace funct_return {
+	//listing the results of functions
 	enum message
 	{
 		successful,
@@ -17,6 +18,7 @@ namespace funct_return {
 		wrongUID
 	};
 	struct Error {
+		//create a message based on the enumeration
 		static string message(message msg);
 	};
 }

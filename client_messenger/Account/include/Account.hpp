@@ -6,10 +6,11 @@ public:
 	Account(const uint64_t ID, const string& userName);
 	Account(const uint64_t ID, const string& userName, const string& email, const string& phoneNumber);
 
-public:
+public:	//setters
 	void setSocket	(const shared_ptr<asio::ip::tcp::socket> socket);
 	void setPassword(const string& password);
-public:
+
+public: //I/O
 	void read();
 	void write(const string& str);
 
@@ -17,7 +18,7 @@ public:
 	void accountOperation();
 	void chatsOperation();
 
-public:
+public:	//Account operation
 	void changeUserName();
 	void changePassword();
 	void changeEmail();
@@ -26,7 +27,7 @@ public:
 	void exitAccount();
 	void deleteAccount();
 
-public:
+public:	//serialization
 	uint8_t serializationLogin();
 
 private: 
