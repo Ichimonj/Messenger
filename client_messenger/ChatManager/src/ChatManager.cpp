@@ -77,7 +77,7 @@ const string Chat::getChatName() const{
 	return this->chatName_;
 }
 const string Chat::getChatUID() const{
-	return this->chatName_;
+	return this->chatUID_;
 }
 const uint32_t Chat::getNotViewedMessage() const{
 	return this->notViewedMessage_;
