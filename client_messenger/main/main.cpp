@@ -3,6 +3,7 @@
 #include"stack"
 #include"Error.hpp"
 #include"FileNames.hpp"
+#include"FileWork.hpp"
 #include<iostream>
 #include<fstream>
 #include"version.hpp"
@@ -20,20 +21,16 @@ static shared_ptr<Account> fastLogin() {
 	}
 	uint64_t ID;
 	string   password;
+	try
+	{
+		reading(file, &ID);
+		reading(file, &password);
+	}
+	catch (const std::exception&)
+	{
+		return nullptr;
+	}
 
-	if (!file.read(reinterpret_cast<char*>(&ID), sizeof(ID))) {
-		return nullptr;
-	}
-	size_t passwordSize;
-	if (!file.read(reinterpret_cast<char*>(&passwordSize), sizeof(passwordSize))) {
-		return nullptr;
-	}
-	password.resize(passwordSize);
-	if (!file.read(reinterpret_cast<char*>(&password),passwordSize)) {
-		return nullptr;
-	}
-	cout << ID << endl;
-	cout << password << endl;
 	error_code ec;
 	char buf[1024];
 

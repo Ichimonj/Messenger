@@ -4,6 +4,7 @@
 #include "Error.hpp"
 #include "Command.hpp"
 #include "FileNames.hpp"
+#include "FileWork.hpp"
 #include <fstream>
 
 Account::Account(const uint64_t ID, const string& userName)
@@ -357,10 +358,16 @@ uint8_t Account::serializationLogin()
 	if (!file.is_open()) {
 		return 1;
 	}
-	size_t sizePassword = this->password_.size();
 
-	file.write(reinterpret_cast<char*>(&this->ID_), sizeof(this->ID_));
-	file.write(reinterpret_cast<char*>(&sizePassword),sizeof(size_t));
-	file.write(password_.c_str(), password_.size());
+	try
+	{
+		record(file, this->ID_);
+		record(file, password_);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+
 	return 0;
 }
