@@ -1,6 +1,8 @@
 #include "ChatManager.hpp"
 #include "Lenguage.hpp"
 #include "Console.hpp"
+#include "FileWork.hpp"
+#include "FileNames.hpp"
 #include "Error.hpp"
 #include "Command.hpp"
 #include <iomanip>
@@ -49,9 +51,62 @@ User::User(const shared_ptr<User> user)
 	this->name	= user->name;
 }
 
+void User::serialization(ofstream& file)
+{
+	try
+	{
+		record(file, ID);
+		record(file, name);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+
+void User::deserialization(ifstream& file)
+{
+	try
+	{
+		reading(file, &ID);
+		reading(file, &name);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+
 Message::Message(string msg, shared_ptr<User> user)
 	:message(msg), user(user) {
-};
+}
+
+void Message::serialization(ofstream& file)
+{
+	try
+	{
+		record(file, message);
+		user->serialization(file);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+void Message::deserialization(ifstream& file)
+{
+	try
+	{
+		reading(file, &message);
+		user = make_shared<User>();
+		user->deserialization(file);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+
 ostream& operator<<(ostream& os, const Message& ex){
 	size_t FILL = 15;
 	os << setw(FILL) << left << setfill('_') << to_string(ex.user->ID) + " - " + ex.user->name << ex.message.c_str();
@@ -109,6 +164,116 @@ void Chat::msgBuffering(const Message msg){
 	}
 }
 
+void Chat::chatSerialization(ofstream& file)
+{
+	try
+	{
+		/*chat name*/
+		record(file, chatName_);
+
+		/*Not Viewed Message*/
+		record(file, notViewedMessage_);
+
+		/*Msg Buffer(size)*/
+		uint64_t msgBufferSize = msgBuffer_.size();
+		record(file, msgBufferSize);
+		/*Msg Buffer(message)*/
+		for (auto& message : msgBuffer_)
+		{
+			message.serialization(file);
+		}
+
+		/*chat uid*/
+		record(file, chatUID_);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+
+void Chat::chatDeserialization(ifstream& file, shared_ptr<User> you, shared_ptr<User> correspondent)
+{
+	try
+	{
+		/*chat name*/
+		reading(file, &chatName_);
+
+		/*Not Viewed Message*/
+		reading(file, (uint64_t*)&notViewedMessage_);
+
+		/*chat users*/
+		map<uint64_t, shared_ptr<User>> users;
+		users.insert({ you->ID, you });
+		users.insert({ correspondent->ID, correspondent });
+
+		/*Msg Buffer(size)*/
+		uint64_t msgBufferSize;
+		reading(file, &msgBufferSize);
+		msgBuffer_.resize(msgBufferSize);
+		/*Msg Buffer(message)*/
+		for (int i = 0; i < msgBufferSize; i++)
+		{
+			Message msg;
+			msg.deserialization(file);
+			if (users.find(msg.user->ID) == users.end())
+			{
+				throw exception("Файл поврежден");
+				return;
+			}
+			msgBuffer_[i] = msg;
+		}
+
+		/*chat uid*/
+		reading(file, &chatUID_);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+
+void Chat::chatDeserialization(ifstream& file, shared_ptr<User> you, map<uint64_t, shared_ptr<User>> correspondents)
+{
+	try
+	{
+		/*chat name*/
+		reading(file, &chatName_);
+
+		/*Not Viewed Message*/
+		reading(file, (uint64_t*)&notViewedMessage_);
+
+		/*chat users*/
+		map<uint64_t, shared_ptr<User>> users;
+		users = correspondents;
+		users.insert({ you->ID, you });
+
+		/*Msg Buffer(size)*/
+		uint64_t msgBufferSize;
+		reading(file, &msgBufferSize);
+		msgBuffer_.resize(msgBufferSize);
+		/*Msg Buffer(message)*/
+		for (int i = 0; i < msgBufferSize; i++)
+		{
+			Message msg;
+			msg.deserialization(file);
+			if (users.find(msg.user->ID) == users.end())
+			{
+				throw exception("Файл поврежден");
+				return;
+			}
+			msgBuffer_[i] = msg;
+		}
+
+		/*chat uid*/
+		reading(file, &chatUID_);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+
 SoloChat::SoloChat(const string& chatUID, const User& user)
 	:Chat(chatUID) {
 	this->correspondent_ = make_shared<User>(user);
@@ -125,6 +290,42 @@ const string SoloChat::chatName() const{
 
 const bool SoloChat::isUserAvailable(uint64_t ID) const{
 	return true;
+}
+
+void SoloChat::serialization(ofstream& file)
+{
+	try
+	{
+		/*chat type*/
+		char ch = '0';
+		record(file, &ch);
+
+		/*correspondent*/
+		correspondent_->serialization(file);
+
+		/*char*/
+		this->chatSerialization(file);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+void SoloChat::deserialization(ifstream& file, shared_ptr<User> you)
+{
+	try
+	{
+		/*correspondent*/
+		correspondent_ = make_shared<User>();
+		correspondent_->deserialization(file);
+
+		/*char*/
+		this->chatDeserialization(file, you, correspondent_);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
 }
 
 GroupChat::GroupChat(const string& chatUID, const shared_ptr<User> user)
@@ -163,6 +364,74 @@ const bool GroupChat::isUserAvailable(uint64_t ID) const{
 		return false;
 	}
 	return false;
+}
+void GroupChat::serialization(ofstream& file)
+{
+	try
+	{
+		/*chat type*/
+		char ch = '1';
+		record(file, &ch);
+
+		/*correspondents size*/
+		uint64_t correspondentsSize = correspondents_.size();
+		record(file, correspondentsSize);
+
+		/*correspondents*/
+		for (auto& user : correspondents_)
+		{
+			user.second->serialization(file);
+		}
+
+		/*Chat*/
+		this->chatSerialization(file);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+void GroupChat::deserialization(ifstream& file, shared_ptr<User> you)
+{
+	try
+	{
+		/*correspondents size*/
+		uint64_t correspondentsSize;
+		reading(file, &correspondentsSize);
+
+		/*correspondents*/
+		for (int i = 0; i < correspondentsSize; i++)
+		{
+			shared_ptr<User> user = make_shared<User>();
+			user->deserialization(file);
+			correspondents_.insert({ user->ID, user });
+		}
+
+		/*Chat*/
+		this->chatDeserialization(file, you, correspondents_);
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+ChatManager::ChatManager(uint64_t ID, const string& name)
+{
+	this->you = make_shared<User>(ID, name);
+};
+ChatManager::~ChatManager()
+{
+	if (saveChatManager) {
+		ofstream file;
+		file.open(chat_mager_file_name, ios::binary);
+		if (!file.is_open()) {
+			return;
+		}
+		this->serialization(file);
+	}
+	else {
+		return;
+	}
 }
 void ChatManager::makeSoloChat(shared_ptr<asio::ip::tcp::socket> socket){
 	system("cls");
@@ -390,6 +659,10 @@ void ChatManager::changeLineSize(size_t lineSize)
 {
 	this->lineSize = lineSize;
 }
+void ChatManager::changeSaveChatManager(bool saveChatManager)
+{
+	this->saveChatManager = saveChatManager;
+}
 void ChatManager::readHandler(string msg, shared_ptr<asio::ip::tcp::socket> socket){
 	if (msg[0] == '#') {
 		size_t startUID = msg.find_first_of('(');
@@ -528,4 +801,67 @@ void ChatManager::updateUIDbase(){
 		UIDbase_.insert({ i,chat.first });
 		i++;
 	}
+}
+
+void ChatManager::serialization(ofstream& file)
+{
+	try
+	{
+		/*you*/
+		you->serialization(file);
+
+		/*chats size*/
+		uint64_t chatsSize = chats_.size();
+		record(file, chatsSize);
+		/*chats*/
+		for (auto& chat : chats_)
+		{
+			chat.second->serialization(file);
+		}
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+}
+
+void ChatManager::deserialization(ifstream& file)
+{
+	try
+	{
+		/*you*/
+		you = make_shared<User>();
+		you->deserialization(file);
+		/*chats size*/
+		uint64_t chatsSize;
+		reading(file, &chatsSize);
+		/*chats*/
+		for (int i = 0; i < chatsSize; i++)
+		{
+			char type;
+			reading(file, &type);
+			if (type == '0')
+			{
+				shared_ptr<SoloChat> chat = make_shared<SoloChat>();
+				chat->deserialization(file, you);
+				chats_.insert({ chat->getChatUID(), chat });
+			}
+			else if (type == '1')
+			{
+				shared_ptr<GroupChat> chat = make_shared<GroupChat>();
+				chat->deserialization(file, you);
+				chats_.insert({ chat->getChatUID(), chat });
+			}
+			else
+			{
+				throw exception("Файл поврежден");
+			}
+		}
+	}
+	catch (const std::exception& e)
+	{
+		throw e;
+	}
+
+	updateUIDbase();
 }
