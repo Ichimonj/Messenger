@@ -23,6 +23,14 @@ void record(ofstream& file, string& type){
     }
 }
 
+void record(ofstream& file, char* type)
+{
+    if (!file.write(reinterpret_cast<char*>(type), sizeof(char)))
+    {
+        throw exception("Ошибка чтения из файла");
+    }
+}
+
 void reading(ifstream& file, uint64_t* type){
     if (!file.read(reinterpret_cast<char*>(type), sizeof(uint64_t)))
     {
@@ -43,6 +51,14 @@ void reading(ifstream& file, string* type){
 
     type->resize(typeSize);
     if (!file.read(reinterpret_cast<char*>(type), typeSize))
+    {
+        throw exception("Ошибка чтения из файла");
+    }
+}
+
+void reading(ifstream& file, char* type)
+{
+    if (!file.read(reinterpret_cast<char*>(type), sizeof(char)))
     {
         throw exception("Ошибка чтения из файла");
     }
