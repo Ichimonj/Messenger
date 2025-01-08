@@ -1,5 +1,6 @@
 #pragma once
 #include "ChatManager.hpp"
+#include "FileNames.hpp"
 
 class Account {
 public:
@@ -24,6 +25,7 @@ public:	//Account operation
 	void changeEmail();
 	void changePhoneNumber();
 	void changeLineSize();
+	void changeSaveChatManager();
 	void exitAccount();
 	void deleteAccount();
 

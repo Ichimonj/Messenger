@@ -3,7 +3,6 @@
 #include "Console.hpp"
 #include "Error.hpp"
 #include "Command.hpp"
-#include "FileNames.hpp"
 #include "FileWork.hpp"
 #include <fstream>
 
@@ -97,6 +96,10 @@ void Account::accountOperation()
 		}
 		else if (operation == "--line size" || operation == "-ls") {
 			changeLineSize();
+			return;
+		}
+		else if (operation == "--save corr" || operation == "-scr") {
+			changeSaveChatManager();
 			return;
 		}
 		else if (operation == "--exit") {
@@ -268,6 +271,33 @@ void Account::changeLineSize()
 		}
 	} while (lineSize == 0);
 	chatManager_.changeLineSize(lineSize);
+}
+
+void Account::changeSaveChatManager()
+{
+	char ch;
+#if(CURRENT_LANGUAGE  == LANGUAGE_RU)
+	cout << "1 - сохранять перепеки\n2 - не сохранять перепеки\n";
+#elif(CURRENT_LANGUAGE == LANGUAGE_EN)
+	cout << "1 - save overbread\n2 - do not save overbake\n";
+#endif
+	cin.ignore();
+	cin >> ch;
+	while (!strchr("12", ch)) {
+#if(CURRENT_LANGUAGE  == LANGUAGE_RU)
+		cout << "1 - сохранять перепеки\n2 - не сохранять перепеки\n";
+#elif(CURRENT_LANGUAGE == LANGUAGE_EN)
+		cout << "1 - save overbread\n2 - do not save overbake\n";
+#endif
+		cin.ignore();
+		cin >> ch;
+	}
+	if (ch == '1') {
+		this->chatManager_.changeSaveChatManager(true);
+	}
+	else {
+		this->chatManager_.changeSaveChatManager(false);
+	}
 }
 
 void Account::exitAccount()

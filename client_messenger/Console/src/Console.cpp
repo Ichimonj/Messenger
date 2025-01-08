@@ -58,6 +58,7 @@ void Console::accountOperation()
 	print("[--ch email  | -che]", "Изменить почту\n", FILL);
 	print("[--ch phone number | -chpn]", "Изменить номер телефона\n", FILL);
 	print("[--line size | -ls]", "Изменить количество строк выводимое в чате\n", FILL);
+	print("[--save corr | -scr]", "Изменить настройку сохранения переписок\n", FILL);
 	print("[--exit]", "Выход\n", FILL);
 	print("[--delete]", "Удалить аккаунт\n", FILL);
 	print("[--back]", "Вернуться назад\n", FILL);
@@ -68,6 +69,7 @@ void Console::accountOperation()
 	print("[--ch email  | -che]", "Change email\n", FILL);
 	print("[--ch phone number | -chpn]", "Change phone number\n", FILL);
 	print("[--line size | --ls]", "Change the number of lines displayed in the chat\n", FILL);
+	print("[--save corr | -scr]", "Change the settings for saving correspondence\n", FILL);
 	print("[--exit]", "Exit", FILL);
 	print("[--delete]", "Delete account", FILL);
 	print("[--back]", "Go back\n", FILL);
