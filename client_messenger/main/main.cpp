@@ -2,10 +2,11 @@
 #include"Console.hpp"
 #include"stack"
 #include"Error.hpp"
-#include"FileNames.hpp"
 #include"FileWork.hpp"
 #include<iostream>
 #include<fstream>
+#include<direct.h>
+#include<filesystem>
 #include"version.hpp"
 
 asio::io_context context;
@@ -326,6 +327,10 @@ static shared_ptr<Account> entry() {
 }
 
 int main(int argc,char* argv[]) {
+	if (!filesystem::exists(fileDirName)) {
+		_mkdir(fileDirName);
+	}
+
 	shared_ptr<Account> account;
 #ifdef _DEBUG
 	socket_ = make_shared<asio::ip::tcp::socket>(context);
