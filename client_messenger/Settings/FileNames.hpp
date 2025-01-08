@@ -1,3 +1,9 @@
 #pragma once
-#include<string>
-const std::string login_file_name = "login_data.bin";
+#ifndef FILE_H
+#define FILE_H
+
+#define fileDirName			 "../DataStorage"
+#define login_file_name		 "../DataStorage/login_data.bin"
+#define chat_mager_file_name "../DataStorage/Chats.bin"
+
+#endif // FILE_H
