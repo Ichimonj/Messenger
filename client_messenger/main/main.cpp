@@ -330,6 +330,11 @@ int main(int argc,char* argv[]) {
 	if (!filesystem::exists(fileDirName)) {
 		_mkdir(fileDirName);
 	}
+	ofstream file;
+	file.open(login_file_name, ios::app);
+	file.close();
+	file.open(chat_mager_file_name, ios::app);
+	file.close();
 
 	shared_ptr<Account> account;
 #ifdef _DEBUG
