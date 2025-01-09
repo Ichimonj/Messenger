@@ -1,6 +1,6 @@
 #include "Server.hpp"
 #include "AccountBase.hpp"
-Server::Server(shared_ptr<asio::io_context> context) : context_(context)
+Server::Server(shared_ptr<asio::io_context> context, const char* ip, int port) : context_(context)
 {
     svDEBUG_LOG("DEBUG_Server", "Server(shared_ptr<asio::io_context> context)");
     acceptor_ = make_shared<asio::ip::tcp::acceptor>(*context_, asio::ip::tcp::endpoint(asio::ip::make_address("127.0.0.1"), 8080));

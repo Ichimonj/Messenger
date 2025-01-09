@@ -11,9 +11,9 @@ class Server
 {
 public:
     Server()                = delete;
-    Server(const Server&)   = delete;    
+    Server(const Server&)   = delete;
     Server(Server&&)        = delete;
-    Server(shared_ptr<asio::io_context> context);
+    Server(shared_ptr<asio::io_context> context, const char* ip, int port);
 
     ~Server();
     void start_accept();
