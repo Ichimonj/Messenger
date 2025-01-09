@@ -415,9 +415,23 @@ void GroupChat::deserialization(ifstream& file, shared_ptr<User> you)
 		throw e;
 	}
 }
+ChatManager::ChatManager()
+{
+}
 ChatManager::ChatManager(uint64_t ID, const string& name)
 {
 	this->you = make_shared<User>(ID, name);
+	try
+	{
+		ifstream file;
+		file.open(chat_mager_file_name, ios::binary);
+		this->deserialization(file);
+	}
+	catch (const std::exception& e)
+	{
+		cout << e.what() << endl;
+		stop();
+	}
 };
 ChatManager::~ChatManager()
 {
@@ -829,9 +843,20 @@ void ChatManager::deserialization(ifstream& file)
 {
 	try
 	{
+		if (file.tellg() == 0) {
+			throw exception("нет сохранных переписок для вашего аккаунта");
+			return;
+		}
+
 		/*you*/
-		you = make_shared<User>();
-		you->deserialization(file);
+		shared_ptr<User> you_ = make_shared<User>();
+		you_->deserialization(file);
+
+		if (you_->ID == you->ID) {
+			throw exception("нет сохранных переписок для вашего аккаунта");
+			return;
+		}
+
 		/*chats size*/
 		uint64_t chatsSize;
 		reading(file, &chatsSize);

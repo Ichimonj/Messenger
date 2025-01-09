@@ -156,7 +156,7 @@ private:
 //the ChatManager class manages all user chats
 class ChatManager {
 public:
-	ChatManager() {}
+	ChatManager();
 	ChatManager(uint64_t ID, const string& name);
 	~ChatManager();
 	//getter
