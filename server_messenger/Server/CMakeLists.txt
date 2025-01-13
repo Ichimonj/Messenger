@@ -13,11 +13,13 @@ add_library(sub::Server ALIAS ${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC sub::Accounts
+    PUBLIC sub::ThreadPool
 )
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/include
     PUBLIC ${PROJECT_SOURCE_DIR}/../Accounts/include
+    PUBLIC ${PROJECT_SOURCE_DIR}/../ThreadPool/include
 )
 
 install(TARGETS ${PROJECT_NAME}
