@@ -1,13 +1,12 @@
 #include"ThreadPool.hpp"
 #include <iostream>
-#include "Preprocessor.hpp"
 #include <string>
 std::shared_ptr<ThreadPool> threadPool;
 
 ThreadPool::ThreadPool(size_t thread_size)
 {
-    tpDEBUG_LOG("Thread pool debug", "ThreadPool()");
-    tpDEBUG_LOG("Thread pool debug", (to_string(thread_size) + " threads"));
+    tpDEBUG_LOG("ThreadPool debug", "ThreadPool()");
+    tpDEBUG_LOG("ThreadPool debug", (to_string(thread_size) + " threads"));
 
     threads.resize(thread_size);
     for (auto& th : threads) {
@@ -18,7 +17,7 @@ ThreadPool::ThreadPool(size_t thread_size)
 
 ThreadPool::~ThreadPool()
 {
-    tpDEBUG_LOG("Thread pool debug", "~ThreadPool()");
+    tpDEBUG_LOG("ThreadPool debug", "~ThreadPool()");
     for (auto& th : threads) {
         th.~thread();
     }
@@ -26,7 +25,7 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::runThread()
 {
-    tpDEBUG_LOG("Thread pool debug", "runThread()");
+    tpDEBUG_LOG("ThreadPool debug", "runThread()");
     while (true) {
         std::function<void()> taskFunc;
         {
@@ -36,5 +35,6 @@ void ThreadPool::runThread()
             task_queue.pop();
         }
         taskFunc(); 
+        tpDEBUG_LOG("ThreadPool debug", "end work task");
     }
 }
