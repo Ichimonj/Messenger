@@ -220,7 +220,7 @@ void TempAccount::create_solo_chat(error_code& ec)
     size_t length = socket_->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
-    for (int i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         if (!isdigit(buf[i])) {
             acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
 
@@ -242,7 +242,7 @@ void TempAccount::add_solo_chat(error_code& ec)
     size_t length = socket_->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
-    for (int i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         if (!isdigit(buf[i])) {
             acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
 
@@ -277,7 +277,7 @@ void TempAccount::create_group_chat(error_code& ec)
     size_t length = socket_->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
-    for (int i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         if (!isdigit(buf[i])) {
             acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
 
@@ -338,7 +338,7 @@ void TempAccount::invite_user(error_code& ec)
     size_t length = socket_->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
-    for (int i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         if (!isdigit(buf[i])) {
             acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
 
@@ -372,7 +372,7 @@ void TempAccount::add_user_group_chat(error_code& ec)
     size_t length = socket_->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
-    for (int i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         if (!isdigit(buf[i])) {
             acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
 

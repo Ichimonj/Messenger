@@ -134,7 +134,7 @@ void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, err
     size_t length = socket->read_some(asio::buffer(buf), ec);   //ID
     if (ec) { EXCEPTIONS_LOG("EXCEPTIONS_account_factory", ec.message()); return; }
 
-    for (int i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         if (!isdigit(buf[i])) {
             return;
         }

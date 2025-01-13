@@ -46,7 +46,7 @@ int main(int argc,char* argv[])
     server.start_accept();
 
     vector<thread> threads;
-    for (int i = 0; i < threadSize; i++) {
+    for (size_t i = 0; i < threadSize; i++) {
         threads.push_back(thread([context]() {context->run(); }));
     }
     for (;;) {

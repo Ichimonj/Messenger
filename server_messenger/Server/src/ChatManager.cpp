@@ -101,7 +101,7 @@ uint8_t ChatManager::inviteUserGroupChat(const uint64_t ID, const string& chatUI
         creator->getSocket()->write_some(asio::buffer(newUserInform.data(), newUserInform.length())); //message to sender
 
         shared_ptr<GroupChat> groupChat = static_pointer_cast<GroupChat>(chat->second);
-        for (int i = 0; i < chat->second->getCountUser(); i++) {
+        for (size_t i = 0; i < chat->second->getCountUser(); i++) {
             if (groupChat->getCorrespondent(i)->getId() != ID) {
                 auto chatUser = groupChat->getCorrespondent(i);
                 chatInformMsg += string("${" + to_string(chatUser->getId()) + "}[" + chatUser->getUserName() + ']');
@@ -214,7 +214,7 @@ void SoloChat::generateUID(const uint64_t userID)
 
     chatUID += (string(hashID, 33));
     chatUID+=(SSLrand(96));
-    for (int i = 1; i < 128; i++) {
+    for (size_t i = 1; i < 128; i++) {
         if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
             chatUID[i] += 1; 
         }
@@ -259,7 +259,7 @@ void GroupChat::generateUID(const uint64_t userID)
 
     chatUID += (string(hashID, 33));
     chatUID += (SSLrand(96));
-    for (int i = 1; i < 128; i++) {
+    for (size_t i = 1; i < 128; i++) {
         if (chatUID[i] == '[' || chatUID[i] == ']' || chatUID[i] == '{' || chatUID[i] == '}') {
             chatUID[i] += 1;
         }

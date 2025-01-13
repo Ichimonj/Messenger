@@ -9,7 +9,7 @@ string Hash(string& str)
 	SHA256_Final(hash, &sha256);
 
 	stringstream ss;
-	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+	for (size_t i = 0; i < SHA256_DIGEST_LENGTH; i++) {
 		ss << hex << setw(2) << setfill('0') << (int)hash[i];
 	}
 	return ss.str();

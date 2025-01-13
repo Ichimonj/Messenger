@@ -9,7 +9,7 @@ string SSLrand(size_t num_bytes)
 	
 	stringstream ss;
 	RAND_bytes(buffer, num_bytes);
-	for (int i = 0; i < num_bytes; i++) {
+	for (size_t i = 0; i < num_bytes; i++) {
 		ss << hex << static_cast<int>(buffer[i]);
 	}
 	delete[] buffer;
