@@ -19,18 +19,23 @@ build
 ### Параметры запуска
 ```[program_name.exe] [number of threads with I\O] [ip] [port]```
 ```[number of threads with I\O] - количество потоков для I\O context```
+```[number of threads with thread pool] - количество потоков для пула потоков```
 ```[ip] - ip на котором будет работать сервер```
 ```[port] - port на котором будет работать сервер``` 
 
 Указывать параметры через пробел без скобок
 
 ### Вариации запуска
+(В текущей версии Thread pool не интегрирован)
 - Все параметры ```[program_name.exe] [number of threads with I\O] [ip] [port]```
-- Количество потоков ```[program_name.exe] [number of threads with I\O]```
+- Количество потоков I\O ```[program_name.exe] [number of threads with I\O]```
+- Количество потоков I\O и пула потоков: 
+```[program_name.exe] [number of threads with I\O] [number of threads with thread pool]```
 - Без параметров ```[program_name.exe]```
 
 ### Параметры по умолчанию
 ```[number of threads with I\O]``` - 12
+```[number of threads with thread pool]``` - 12
 ```[ip]``` - 127.0.0.1
 ```[port]``` - 8080
 ## Установка клиентской части
