@@ -1,6 +1,5 @@
 #pragma once
 #include <iostream>
-#include <thread>
 #include "asio.hpp"
 #include "AccountFactory.hpp"
 #include "AccountBase.hpp"

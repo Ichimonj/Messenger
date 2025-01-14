@@ -1,5 +1,6 @@
 #include "TempAccount.hpp"
 #include "ServerError.hpp"
+#include "ThreadPool.hpp"
 //constructors
 TempAccount::TempAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string& userName, const string& password)
     : Account(socket, ID, userName, password)
@@ -26,7 +27,7 @@ void TempAccount::reading()
         [&](const error_code& ec, size_t length)
         {
             if (!ec) {
-                thread([&]() {read_handler(buf, length); }).join();
+                threadPool->addTask([&]() {read_handler(buf, length); });
             }
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");

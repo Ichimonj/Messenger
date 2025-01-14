@@ -1,5 +1,6 @@
 #include "UserAccount.hpp"
 #include "ServerError.hpp"
+#include "ThreadPool.hpp"
 //constructors
 UserAccount::UserAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string &userName, const string &password, const string &emale, const PhoneNumber &phoneNumber)
     : Account(socket, ID, userName, password), emale_(emale), phoneNumber_(phoneNumber)
@@ -27,7 +28,7 @@ void UserAccount::reading()
         [&](const error_code& ec, size_t length)
         {
             if (!ec) {
-                thread([&]() {read_handler(buf, length); }).join();
+                threadPool->addTask([&]() {read_handler(buf, length); });
             }
             else {
                 ERROR_LOG("ERROR_User_account", "error reading");

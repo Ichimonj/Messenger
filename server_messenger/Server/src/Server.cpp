@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "AccountBase.hpp"
+#include "ThreadPool.hpp"
 Server::Server(shared_ptr<asio::io_context> context, const char* ip, int port) : context_(context)
 {
     svDEBUG_LOG("DEBUG_Server", "Server(shared_ptr<asio::io_context> context)");
@@ -22,7 +23,7 @@ void Server::start_accept()
             if (!ec)
             {
                 svDEBUG_LOG("DEBUG_Server", "New client connected!");
-                thread([this, socket]() {add_client(socket); }).detach();
+                threadPool->addTask([this, socket]() {add_client(socket); });
             }
             else
             {
