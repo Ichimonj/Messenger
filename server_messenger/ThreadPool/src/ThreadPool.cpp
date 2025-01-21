@@ -1,7 +1,7 @@
 #include"ThreadPool.hpp"
 #include <iostream>
 #include <string>
-std::shared_ptr<ThreadPool> threadPool;
+shared_ptr<ThreadPool> threadPool;
 
 ThreadPool::ThreadPool(size_t thread_size)
 {
@@ -10,7 +10,7 @@ ThreadPool::ThreadPool(size_t thread_size)
 
     threads.resize(thread_size);
     for (auto& th : threads) {
-        th = std::thread([this]() { runThread(); });
+        th = thread([this]() { runThread(); });
         th.detach();
     }
 }
@@ -27,9 +27,9 @@ void ThreadPool::runThread()
 {
     tpDEBUG_LOG("ThreadPool debug", "runThread()");
     while (true) {
-        std::function<void()> taskFunc;
+        function<void()> taskFunc;
         {
-            std::unique_lock<std::mutex> lock(queue_mutex);
+            unique_lock<mutex> lock(queue_mutex);
             cv.wait(lock, [this] { return !task_queue.empty(); }); 
             taskFunc = task_queue.front();
             task_queue.pop();

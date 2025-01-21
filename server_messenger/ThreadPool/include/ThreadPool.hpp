@@ -7,7 +7,6 @@
 #include <future>
 #include "Preprocessor.hpp"
 
-using namespace std;
 class ThreadPool {
 public:
     ThreadPool(size_t thread_size);
@@ -15,30 +14,30 @@ public:
 
 public:
     template<typename F, typename... Argc>
-    auto addTask(F&& f, Argc&&... argc) -> std::future<decltype(f(argc ...))>;
+    auto addTask(F&& f, Argc&&... argc) -> future<decltype(f(argc ...))>;
 
 private:
     void runThread();
 
 private:
-    vector<thread> threads;
-    queue<std::function<void()>> task_queue;
-    mutex queue_mutex;
-    std::condition_variable cv;
+    vector<thread>          threads;
+    queue<function<void()>> task_queue;
+    mutex                   queue_mutex;
+    condition_variable      cv;
 };
 
 template<typename F, typename ...Argc>
-auto ThreadPool::addTask(F&& f, Argc && ...argc) -> std::future<decltype(f(argc ...))>
+auto ThreadPool::addTask(F&& f, Argc && ...argc) -> future<decltype(f(argc ...))>
 {
     tpDEBUG_LOG("ThreadPool debug", "addTask");
 
     using return_type = decltype(f(argc...));
-    auto taskPtr = std::make_shared<std::packaged_task<return_type()>>(
-        std::bind(std::forward<F>(f), std::forward<Argc>(argc)...)
+    auto taskPtr = make_shared<packaged_task<return_type()>>(
+        bind(forward<F>(f), forward<Argc>(argc)...)
     );
-    std::future<return_type> result = taskPtr->get_future();
+    future<return_type> result = taskPtr->get_future();
     {
-        std::unique_lock<std::mutex> lock(queue_mutex);
+        unique_lock<mutex> lock(queue_mutex);
         task_queue.push([taskPtr]() { (*taskPtr)(); });
         lock.unlock();
     }
