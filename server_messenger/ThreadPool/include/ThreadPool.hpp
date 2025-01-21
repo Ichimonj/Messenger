@@ -22,6 +22,7 @@ private:
 private:
     vector<thread>          threads;
     queue<function<void()>> task_queue;
+    mutex                   cv_mutex;
     mutex                   queue_mutex;
     condition_variable      cv;
 };
@@ -37,9 +38,9 @@ auto ThreadPool::addTask(F&& f, Argc && ...argc) -> future<decltype(f(argc ...))
     );
     future<return_type> result = taskPtr->get_future();
     {
-        unique_lock<mutex> lock(queue_mutex);
+        queue_mutex.lock();
         task_queue.push([taskPtr]() { (*taskPtr)(); });
-        lock.unlock();
+        queue_mutex.unlock();
     }
     cv.notify_one();
     return result;

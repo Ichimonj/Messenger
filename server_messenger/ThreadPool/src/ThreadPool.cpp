@@ -29,12 +29,14 @@ void ThreadPool::runThread()
     while (true) {
         function<void()> taskFunc;
         {
-            unique_lock<mutex> lock(queue_mutex);
+            unique_lock<mutex> lock(cv_mutex);
             cv.wait(lock, [this] { return !task_queue.empty(); }); 
+            queue_mutex.lock();
             taskFunc = task_queue.front();
             task_queue.pop();
         }
         taskFunc(); 
+        queue_mutex.unlock();
         tpDEBUG_LOG("ThreadPool debug", "end work task");
     }
 }
