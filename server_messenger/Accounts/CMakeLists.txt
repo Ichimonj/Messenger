@@ -13,6 +13,7 @@ add_library(sub::Accounts ALIAS ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}
     PUBLIC sub::Crypto
     PUBLIC sub::PhoneNumber
+    PUBLIC sub::ThreadPool
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -21,6 +22,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/../Server/include
     PUBLIC ${PROJECT_SOURCE_DIR}/../Preprocessor
     PUBLIC ${PROJECT_SOURCE_DIR}/../Cryptography/include
+    PUBLIC ${PROJECT_SOURCE_DIR}/../ThreadPool/include
     PUBLIC D:/vs/newlibs/asio-1.18.0/include
 )
 

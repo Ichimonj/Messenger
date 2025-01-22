@@ -27,7 +27,7 @@ public:
 
 private:
 	void read_handler(const char* buf, const size_t length);
-	bool checkError(const error_code& ec);
+	bool checkError	 (const error_code& ec);
 
 private:
 	void change_name		(error_code& ec);
@@ -41,7 +41,7 @@ private:
 	void add_solo_chat		(error_code& ec);
 	void create_group_chat	(error_code& ec);
 	void add_group_chat		(error_code& ec);
-	void invite_user(		error_code& ec);
+	void invite_user		(error_code& ec);
 	void add_user_group_chat(error_code& ec);
 	void select_chat		(error_code& ec);
 public:

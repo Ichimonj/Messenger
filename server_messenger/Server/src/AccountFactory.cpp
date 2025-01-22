@@ -3,8 +3,8 @@
 //important: version without encryption
 atomic<uint64_t> AccountFactory::count = 0;
 vector<uint64_t> AccountFactory::free_id{};
-mutex AccountFactory::mtAssignmentId;
-mutex AccountFactory::mtAccountInsert;
+mutex AccountFactory::mt_assignment_id;
+mutex AccountFactory::mt_account_insert;
 
 void AccountFactory::make_account(shared_ptr<asio::ip::tcp::socket> socket)
 {
@@ -46,17 +46,17 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
 
     uint64_t ID;
-    mtAssignmentId.lock();
+    mt_assignment_id.lock();
     if (free_id.empty()) { ID = count++; }
     else {
         ID = free_id.back();
         free_id.pop_back();
     }
-    mtAssignmentId.unlock();
+    mt_assignment_id.unlock();
 
-    mtAccountInsert.lock();
+    mt_account_insert.lock();
     account_base.insert(make_shared<TempAccount>(socket, ID, _userName,_password));
-    mtAccountInsert.unlock();
+    mt_account_insert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation temp account ID - "+to_string(ID)));
     string accountData = to_string(ID) + '\n' + _userName;
@@ -109,17 +109,17 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
 
     uint64_t ID;
-    mtAssignmentId.lock();
+    mt_assignment_id.lock();
     if (free_id.empty()) { ID = count++; }
     else {
         ID = free_id.back();
         free_id.pop_back();
     }
-    mtAssignmentId.unlock();
+    mt_assignment_id.unlock();
 
-    mtAccountInsert.lock();
+    mt_account_insert.lock();
     account_base.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _email, _phoneNumber));
-    mtAccountInsert.unlock();
+    mt_account_insert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation user account ID - " + to_string(ID)));
     string accountData = to_string(ID) + '\n' + _userName + '\n' + _email + '\n' + _phoneNumber.getNumber();

@@ -20,6 +20,6 @@ public:
 private:
     void add_client(shared_ptr<asio::ip::tcp::socket> socket);
 private:
-    shared_ptr<asio::io_context> context_;
-    shared_ptr<asio::ip::tcp::acceptor> acceptor_;
+    shared_ptr<asio::io_context>        context;
+    shared_ptr<asio::ip::tcp::acceptor> acceptor;
 };

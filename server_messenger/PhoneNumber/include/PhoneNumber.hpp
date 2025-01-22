@@ -32,10 +32,10 @@ private:
     void checkNumber();
     void setCodes();
     
-    string phoneNumber_ = "NULL";
-    bool isValid_ = false;
+    string  phone_number = "NULL";
+    bool    is_valid     = false;
 
-    uint16_t countryCode_       = 0;
-    uint16_t operatorCode_      = 0;
-    uint32_t subscriberNumber_  = 0;
+    uint16_t country_code       = 0;
+    uint16_t operator_code      = 0;
+    uint32_t subscriber_number  = 0;
 };

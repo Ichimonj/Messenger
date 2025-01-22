@@ -50,9 +50,9 @@ public:
 protected:
 	char buf[1024];
 
-	shared_ptr<asio::ip::tcp::socket> socket_;
-	const uint64_t 	ID_;
-	string 			userName_ = "NULL";
-	string			password_ = "NULL";
-	status 			status_	  = online;
+	shared_ptr<asio::ip::tcp::socket> socket;
+	const uint64_t 	ID;
+	string 			user_name = "NULL";
+	string			password = "NULL";
+	status 			status	  = online;
 };
