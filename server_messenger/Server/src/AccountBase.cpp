@@ -42,4 +42,4 @@ void AccountBase::print()
         user.second->print();
     }
 }
-AccountBase accountBase;
+AccountBase account_base;

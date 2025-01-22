@@ -24,20 +24,20 @@ public:
 	uint8_t addSoloChat		(const string& chatUID,const uint64_t ID);
 	uint8_t addGroupChat	(const string& chatUID,const vector<uint64_t> IDs);
 
-	void bufferingMsg	(const string& msg);
+	void bufferingMsg		(const string& msg);
 
 	vector<string> getBuffer();
 private:
 	shared_ptr<Chat>				correspondence;
 	map<string, shared_ptr<Chat>>	chats;
-	vector<string>					favoriteMessages;
-	vector<string>					msgBuffer;
+	vector<string>					favorite_messages;
+	vector<string>					msg_buffer;
 };
 
 class Chat {
 public:
 	Chat() {};
-	Chat(const string& chatUID) :chatUID(chatUID) {};
+	Chat(const string& chatUID) :chat_UID(chatUID) {};
 	
 	virtual ~Chat() {};
 public:
@@ -46,15 +46,15 @@ public:
 	virtual void		 generateUID	 (const uint64_t userID) = 0;
 	virtual uint8_t		 addUserGroupChat(const shared_ptr<Account> user) = 0;
 	virtual const size_t getCountUser() const = 0;
-	string chatUID;
+	string chat_UID;
 private:
 };
 
 class SoloChat :public Chat {
 public:
-	SoloChat(const shared_ptr<Account> user) { this->correspondent_ = user; }
+	SoloChat(const shared_ptr<Account> user) { this->correspondent = user; }
 	SoloChat(const string& chatUID, const shared_ptr<Account> user)
-		:Chat(chatUID), correspondent_(user) {}
+		:Chat(chatUID), correspondent(user) {}
 
 public:
 	void	printChat		(const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket) override;
@@ -63,14 +63,14 @@ public:
 	const size_t getCountUser()const override { return 1; }
 
 private:
-	shared_ptr<Account> correspondent_;
+	shared_ptr<Account> correspondent;
 };
 
 class GroupChat : public Chat {
 public:
-	GroupChat(const shared_ptr<Account> user) { this->correspondents_.push_back(user); }
+	GroupChat(const shared_ptr<Account> user) { this->correspondents.push_back(user); }
 	GroupChat(const string& chatUID, const vector<shared_ptr<Account>> users)
-		:Chat(chatUID), correspondents_(users) {}
+		:Chat(chatUID), correspondents(users) {}
 
 public:
 	void printChat			(const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket) override;
@@ -79,5 +79,5 @@ public:
 	const size_t getCountUser()const override;
 	const shared_ptr<Account> getCorrespondent(const size_t num);
 private:
-	vector<shared_ptr<Account>> correspondents_; 
+	vector<shared_ptr<Account>> correspondents; 
 };

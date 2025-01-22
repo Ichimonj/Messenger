@@ -48,8 +48,8 @@ public:
 	friend ostream &operator<<(ostream &os, const UserAccount &ex);
 
 private:
-	string 		emale_;
-	PhoneNumber phoneNumber_;
+	string 		email;
+	PhoneNumber phone_number;
 
-	ChatManager chatManager;
+	ChatManager chat_manager;
 };

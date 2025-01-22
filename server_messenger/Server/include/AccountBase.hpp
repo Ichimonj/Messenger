@@ -20,4 +20,4 @@ public:
 private:
     userSet user_base;
 };
-extern AccountBase accountBase;
+extern AccountBase account_base;

@@ -46,5 +46,5 @@ public:
 	friend ostream &operator<<(ostream &os, const TempAccount &ex);
 
 private:
-	ChatManager chatManager;
+	ChatManager chat_manager;
 };

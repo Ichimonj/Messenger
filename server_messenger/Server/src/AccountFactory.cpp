@@ -55,7 +55,7 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     mtAssignmentId.unlock();
 
     mtAccountInsert.lock();
-    accountBase.insert(make_shared<TempAccount>(socket, ID, _userName,_password));
+    account_base.insert(make_shared<TempAccount>(socket, ID, _userName,_password));
     mtAccountInsert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation temp account ID - "+to_string(ID)));
@@ -118,7 +118,7 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
     mtAssignmentId.unlock();
 
     mtAccountInsert.lock();
-    accountBase.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _email, _phoneNumber));
+    account_base.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _email, _phoneNumber));
     mtAccountInsert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation user account ID - " + to_string(ID)));
@@ -141,7 +141,7 @@ void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, err
     }
 
     uint64_t ID = stoi(string(buf, length));
-    auto user = accountBase.findUser(ID);
+    auto user = account_base.findUser(ID);
     if (user == nullptr) {
         EXCEPTIONS_LOG("Account_factory", "account not found");
         socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::noUser)}), ec);

@@ -1,10 +1,10 @@
 #include "Server.hpp"
 #include "AccountBase.hpp"
 #include "ThreadPool.hpp"
-Server::Server(shared_ptr<asio::io_context> context, const char* ip, int port) : context_(context)
+Server::Server(shared_ptr<asio::io_context> context, const char* ip, int port) : context(context)
 {
     svDEBUG_LOG("DEBUG_Server", "Server(shared_ptr<asio::io_context> context)");
-    acceptor_ = make_shared<asio::ip::tcp::acceptor>(*context_, asio::ip::tcp::endpoint(asio::ip::make_address("127.0.0.1"), 8080));
+    acceptor = make_shared<asio::ip::tcp::acceptor>(*context, asio::ip::tcp::endpoint(asio::ip::make_address("127.0.0.1"), 8080));
 }
 
 Server::~Server()
@@ -16,9 +16,9 @@ void Server::start_accept()
 {
     svDEBUG_LOG("DEBUG_Server", "Starting to accept connections...");
 
-    auto socket = make_shared<asio::ip::tcp::socket>(*context_);
+    auto socket = make_shared<asio::ip::tcp::socket>(*context);
 
-    acceptor_->async_accept(*socket, [this, socket](const error_code& ec)
+    acceptor->async_accept(*socket, [this, socket](const error_code& ec)
         {
             if (!ec)
             {

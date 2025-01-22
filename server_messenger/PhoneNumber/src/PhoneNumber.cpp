@@ -1,43 +1,43 @@
 #include "PhoneNumber.hpp"
 //constructors
 PhoneNumber::PhoneNumber()
-    : isValid_(false), phoneNumber_("NULL")
+    : is_valid(false), phone_number("NULL")
 {
     phDEBUG_LOG("DEBUG_phone", "PhoneNumber()");
 }
 PhoneNumber::PhoneNumber(const string &phoneNumber)
 {
     phDEBUG_LOG("DEBUG_phone", "PhoneNumber(const string& phoneNumber)");
-    this->phoneNumber_ = phoneNumber;
+    this->phone_number = phoneNumber;
     checkNumber();
-    if (isValid_)
+    if (is_valid)
         setCodes();
 }
 PhoneNumber::PhoneNumber(const char *phoneNumber)
 {
     phDEBUG_LOG("DEBUG_phone", "PhoneNumber(const char* phoneNumber)");
-    this->phoneNumber_ = string(phoneNumber);
+    this->phone_number = string(phoneNumber);
     checkNumber();
-    if (isValid_)
+    if (is_valid)
         setCodes();
 }
 PhoneNumber::PhoneNumber(const PhoneNumber &other)
 {
     phDEBUG_LOG("DEBUG_phone", "PhoneNumber(const PhoneNumber& ex)");
-    this->phoneNumber_      = other.phoneNumber_;
-    this->isValid_          = other.isValid_;
+    this->phone_number      = other.phone_number;
+    this->is_valid          = other.is_valid;
 
-    this->countryCode_      = other.countryCode_;
-    this->operatorCode_     = other.operatorCode_;
-    this->subscriberNumber_ = other.subscriberNumber_;
+    this->country_code      = other.country_code;
+    this->operator_code     = other.operator_code;
+    this->subscriber_number = other.subscriber_number;
 }
 PhoneNumber::PhoneNumber(PhoneNumber &&other) noexcept
-    : phoneNumber_(move(other.phoneNumber_)), isValid_(other.isValid_)
+    : phone_number(move(other.phone_number)), is_valid(other.is_valid)
 {
     phDEBUG_LOG("DEBUG_phone", "PhoneNumber(PhoneNumber&& ex)");
-    this->countryCode_      = other.countryCode_;
-    this->operatorCode_     = other.operatorCode_;
-    this->subscriberNumber_ = other.subscriberNumber_;
+    this->country_code      = other.country_code;
+    this->operator_code     = other.operator_code;
+    this->subscriber_number = other.subscriber_number;
 }
 
 //destructor
@@ -49,7 +49,7 @@ PhoneNumber::~PhoneNumber()
 //operators
 ostream &operator<<(ostream &os, const PhoneNumber &ex)
 {
-    os << ex.phoneNumber_;
+    os << ex.phone_number;
     return os;
 }
 PhoneNumber &PhoneNumber::operator=(const PhoneNumber &other)
@@ -58,12 +58,12 @@ PhoneNumber &PhoneNumber::operator=(const PhoneNumber &other)
     if (this != &other)
     {
         phDEBUG_LOG("DEBUG_phone", "assignment");
-        this->phoneNumber_      = other.phoneNumber_;
-        this->isValid_          = other.isValid_;
+        this->phone_number      = other.phone_number;
+        this->is_valid          = other.is_valid;
 
-        this->countryCode_      = other.countryCode_;
-        this->operatorCode_     = other.operatorCode_;
-        this->subscriberNumber_ = other.subscriberNumber_;
+        this->country_code      = other.country_code;
+        this->operator_code     = other.operator_code;
+        this->subscriber_number = other.subscriber_number;
     }
     else
     {
@@ -75,52 +75,52 @@ PhoneNumber &PhoneNumber::operator=(const PhoneNumber &other)
 //sets
 void PhoneNumber::setNumber(string phoneNumber)
 {
-    this->phoneNumber_ = phoneNumber;
+    this->phone_number = phoneNumber;
     checkNumber();
-    if (isValid_)
+    if (is_valid)
         setCodes();
 }
 
 //gets
-string PhoneNumber::getNumber()const             { return this->phoneNumber_; }
-uint16_t PhoneNumber::getCountryCode()const      { return this->countryCode_; }
-uint16_t PhoneNumber::getOperatorCode()const     { return this->operatorCode_; }
-uint32_t PhoneNumber::getSubscriberNumber()const { return this->subscriberNumber_;}
+string PhoneNumber::getNumber()const             { return this->phone_number; }
+uint16_t PhoneNumber::getCountryCode()const      { return this->country_code; }
+uint16_t PhoneNumber::getOperatorCode()const     { return this->operator_code; }
+uint32_t PhoneNumber::getSubscriberNumber()const { return this->subscriber_number;}
 
 //other member functions
-const bool PhoneNumber::isValid() const { return isValid_; }
+const bool PhoneNumber::isValid() const { return is_valid; }
 void PhoneNumber::checkNumber()
 {
     phDEBUG_LOG("DEBUG_phone", "Start checkNumber()");
 
-    if (phoneNumber_.size() < MIN_NUMBER_LENGTH || phoneNumber_.size() > MAX_NUMBER_LENGTH)
+    if (phone_number.size() < MIN_NUMBER_LENGTH || phone_number.size() > MAX_NUMBER_LENGTH)
     {
         phDEBUG_LOG("DEBUG_phone", "End checkNumber() FALSE");
-        isValid_ = false;
-        phoneNumber_ = "NULL";
+        is_valid = false;
+        phone_number = "NULL";
         return;
     }
     else
     {
-        for (auto &ex : phoneNumber_)
+        for (auto &ex : phone_number)
         {
             if (!isdigit(ex))
             {
                 phDEBUG_LOG("DEBUG_phone", "End checkNumber() FALSE");
-                phoneNumber_ = "NULL";
-                isValid_ = false;
+                phone_number = "NULL";
+                is_valid = false;
                 return;
             }
         }
         phDEBUG_LOG("DEBUG_phone", "End checkNumber() TRUE");
-        isValid_ = true;
+        is_valid = true;
         return;
     }
 }
 
 void PhoneNumber::setCodes()
 {
-    this->countryCode_      = stoi(phoneNumber_.substr(1, phoneNumber_.size()   - 10));
-    this->operatorCode_     = stoi(phoneNumber_.substr(phoneNumber_.size()      - 10, 3));
-    this->subscriberNumber_ = stoi(phoneNumber_.substr(phoneNumber_.size()      - 7));
+    this->country_code      = stoi(phone_number.substr(1, phone_number.size()   - 10));
+    this->operator_code     = stoi(phone_number.substr(phone_number.size()      - 10, 3));
+    this->subscriber_number = stoi(phone_number.substr(phone_number.size()      - 7));
 }

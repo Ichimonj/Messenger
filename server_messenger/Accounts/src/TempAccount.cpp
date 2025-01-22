@@ -23,7 +23,7 @@ TempAccount::~TempAccount()
 //other member functions
 void TempAccount::reading()
 {
-    socket_->async_read_some(asio::buffer(buf),
+    socket->async_read_some(asio::buffer(buf),
         [&](const error_code& ec, size_t length)
         {
             if (!ec) {
@@ -31,9 +31,9 @@ void TempAccount::reading()
             }
             else {
                 ERROR_LOG("ERROR_Temp_account", "error reading");
-                this->status_ = deleted;
+                this->status = deleted;
                 AccountFactory::free_id.push_back(this->getId());
-                accountBase.erase(this->getId());
+                account_base.erase(this->getId());
             }
         });
 }
@@ -47,7 +47,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         error_code ec;
         char subBuf[1024];
 
-        size_t length = socket_->read_some(asio::buffer(subBuf), ec);
+        size_t length = socket->read_some(asio::buffer(subBuf), ec);
         if (checkError(ec)) return;
 
         msg = string(subBuf, length);
@@ -82,7 +82,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
         error_code ec;
         char subBuf[1024];
 
-        size_t length = socket_->read_some(asio::buffer(subBuf), ec);
+        size_t length = socket->read_some(asio::buffer(subBuf), ec);
         if (checkError(ec)) return;
 
         msg = string(subBuf, length);
@@ -123,7 +123,7 @@ void TempAccount::read_handler(const char* buf, const size_t length)
     }
     /*msg output*/
     else {
-        chatManager.printChat(string("${" + to_string(this->getId()) + '}' + '[' + this->getUserName() + ']' + msg), this->getSocket());
+        chat_manager.printChat(string("${" + to_string(this->getId()) + '}' + '[' + this->getUserName() + ']' + msg), this->getSocket());
         reading();
     }
 }
@@ -131,9 +131,9 @@ bool TempAccount::checkError(const error_code& ec)
 {
     if (ec) {
         ERROR_LOG("ERROR_Temp_account", "error reading");
-        this->status_ = deleted;
+        this->status = deleted;
         AccountFactory::free_id.push_back(this->getId());
-        accountBase.erase(this->getId());
+        account_base.erase(this->getId());
         return true;
     }
     return false;
@@ -141,11 +141,11 @@ bool TempAccount::checkError(const error_code& ec)
 void TempAccount::change_name(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     string msg = string(buf, length);
-    this->userName_ = msg;
+    this->user_name = msg;
 
     reading();
     return;
@@ -154,26 +154,26 @@ void TempAccount::change_password(error_code& ec)
 {
     char buf[1024];
     //old password
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     string msg = string(buf, length);
-    if (this->password_ == Hash(msg)) {
+    if (this->password == Hash(msg)) {
         //new password
-        length = socket_->read_some(asio::buffer(buf), ec);
+        length = socket->read_some(asio::buffer(buf), ec);
         if (checkError(ec)) return;
 
         msg = string(buf, length);
-        this->password_ = Hash(msg);
+        this->password = Hash(msg);
 
-        socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
         if (checkError(ec)) return;
 
         reading();
         return;
     }
     else {
-        socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongPassword) }), ec);
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongPassword) }), ec);
         if (checkError(ec)) return;
 
         reading();
@@ -183,13 +183,13 @@ void TempAccount::change_password(error_code& ec)
 void TempAccount::exit_account(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     if (string(buf, length) == "__Y") {
         acDEBUG_LOG("ERROR_Temp_account", "log out of account");
-        this->socket_->close();
-        this->status_ = offline;
+        this->socket->close();
+        this->status = offline;
         return;
     }
     acDEBUG_LOG("ERROR_Temp_account", "don't log out of account");
@@ -200,15 +200,15 @@ void TempAccount::exit_account(error_code& ec)
 void TempAccount::delete_account(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     if (string(buf, length) == "__Y") {
         acDEBUG_LOG("ERROR_Temp_account", "delete account");
-        this->socket_->close();
-        this->status_ = deleted;
+        this->socket->close();
+        this->status = deleted;
         AccountFactory::free_id.push_back(this->getId());
-        accountBase.erase(this->getId());
+        account_base.erase(this->getId());
         return;
     }
     reading();
@@ -218,21 +218,21 @@ void TempAccount::delete_account(error_code& ec)
 void TempAccount::create_solo_chat(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     for (size_t i = 0; i < length; i++) {
         if (!isdigit(buf[i])) {
             acDEBUG_LOG("DEBUG_Temp_account", "not a number entered");
 
-            socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongID) }), ec);
+            socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongID) }), ec);
             reading();
             return;
         }
     }
 
     uint64_t ID(stoi(string(buf, length)));
-    chatManager.createSoloChat(ID, accountBase.findUser(this->ID_));
+    chat_manager.createSoloChat(ID, account_base.findUser(this->ID));
 
     reading();
     return;
@@ -240,7 +240,7 @@ void TempAccount::create_solo_chat(error_code& ec)
 void TempAccount::add_solo_chat(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     for (size_t i = 0; i < length; i++) {
@@ -253,20 +253,20 @@ void TempAccount::add_solo_chat(error_code& ec)
     }
     uint64_t ID(stoi(string(buf, length)));
 
-    length = socket_->read_some(asio::buffer(buf), ec);
+    length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     if (length != 128) {
         acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
-        socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
         reading();
         return;
     }
     string chatUID = (string(buf, length));
 
-    uint8_t result = chatManager.addSoloChat(chatUID, ID);
+    uint8_t result = chat_manager.addSoloChat(chatUID, ID);
 
-    socket_->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
     if (checkError(ec)) return;
 
     reading();
@@ -275,7 +275,7 @@ void TempAccount::add_solo_chat(error_code& ec)
 void TempAccount::create_group_chat(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     for (size_t i = 0; i < length; i++) {
@@ -288,8 +288,8 @@ void TempAccount::create_group_chat(error_code& ec)
     }
     uint64_t ID(stoi(string(buf, length)));
 
-    uint8_t result = chatManager.createGroupChat(ID, accountBase.findUser(this->ID_));
-    socket_->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
+    uint8_t result = chat_manager.createGroupChat(ID, account_base.findUser(this->ID));
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
     if (checkError(ec)) return;
 
     reading();
@@ -298,7 +298,7 @@ void TempAccount::create_group_chat(error_code& ec)
 void TempAccount::add_group_chat(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     istringstream iss(string(buf, length));
@@ -314,20 +314,20 @@ void TempAccount::add_group_chat(error_code& ec)
         }
         if (isNum) { IDs.push_back(stoi(ID)); }
     }
-    length = socket_->read_some(asio::buffer(buf), ec);
+    length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     if (length != 128) {
         acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
-        socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
         reading();
         return;
     }
     string chatUID = (string(buf, length));
 
-    uint8_t result = chatManager.addGroupChat(chatUID, IDs);
+    uint8_t result = chat_manager.addGroupChat(chatUID, IDs);
 
-    socket_->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
     if (checkError(ec)) return;
 
     reading();
@@ -336,7 +336,7 @@ void TempAccount::add_group_chat(error_code& ec)
 void TempAccount::invite_user(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     for (size_t i = 0; i < length; i++) {
@@ -349,19 +349,19 @@ void TempAccount::invite_user(error_code& ec)
     }
     uint64_t ID(stoi(string(buf, length)));
 
-    length = socket_->read_some(asio::buffer(buf), ec);
+    length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     if (length != 128) {
         acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
-        socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
         reading();
         return;
     }
     string chatUID = (string(buf, length));
 
-    uint8_t addUserResult = chatManager.inviteUserGroupChat(ID, chatUID, accountBase.findUser(this->ID_));
-    socket_->write_some(asio::buffer({ static_cast<unsigned char>(addUserResult) }), ec);
+    uint8_t addUserResult = chat_manager.inviteUserGroupChat(ID, chatUID, account_base.findUser(this->ID));
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(addUserResult) }), ec);
     if (checkError(ec)) return;
 
     reading();
@@ -370,7 +370,7 @@ void TempAccount::invite_user(error_code& ec)
 void TempAccount::add_user_group_chat(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     for (size_t i = 0; i < length; i++) {
@@ -383,19 +383,19 @@ void TempAccount::add_user_group_chat(error_code& ec)
     }
     uint64_t ID(stoi(string(buf, length)));
 
-    length = socket_->read_some(asio::buffer(buf), ec);
+    length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     if (length != 128) {
         acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
-        socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
         reading();
         return;
     }
     string chatUID = (string(buf, length));
 
-    uint8_t addUserResult = chatManager.addUserGroupChat(ID, chatUID, accountBase.findUser(this->ID_));
-    socket_->write_some(asio::buffer({ static_cast<unsigned char>(addUserResult) }), ec);
+    uint8_t addUserResult = chat_manager.addUserGroupChat(ID, chatUID, account_base.findUser(this->ID));
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(addUserResult) }), ec);
     if (checkError(ec)) return;
 
     reading();
@@ -404,25 +404,25 @@ void TempAccount::add_user_group_chat(error_code& ec)
 void TempAccount::select_chat(error_code& ec)
 {
     char buf[1024];
-    size_t length = socket_->read_some(asio::buffer(buf), ec);
+    size_t length = socket->read_some(asio::buffer(buf), ec);
     if (checkError(ec)) return;
 
     if (length == 1) {
-        chatManager.setChatIndex("0");
-        socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
+        chat_manager.setChatIndex("0");
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
         reading();
         return;
     }
     if (length != 128) {
         acDEBUG_LOG("DEBUG_Temp_account", "wrong UID");
-        socket_->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
+        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongUID) }), ec);
         reading();
         return;
     }
     string chatUID = (string(buf, length));
 
-    uint8_t result = chatManager.setChatIndex(chatUID);
-    socket_->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
+    uint8_t result = chat_manager.setChatIndex(chatUID);
+    socket->write_some(asio::buffer({ static_cast<unsigned char>(result) }), ec);
     if (checkError(ec)) return;
 
     reading();
