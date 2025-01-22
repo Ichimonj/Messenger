@@ -7,32 +7,32 @@
 #include <fstream>
 
 Account::Account(const uint64_t ID, const string& userName)
-	:ID_	 (ID),		userName_	(userName), 
-	email_	 (""),		phoneNumber_(""), 
-	password_(""),		chatManager_(ID_, userName)
+	:ID	 (ID),		user_name	(userName), 
+	email	 (""),		phone_number(""), 
+	password(""),		chat_manager(ID, userName)
 {
 }
 
 Account::Account(const uint64_t ID, const string& userName, const string& email, const string& phoneNumber)
-	:ID_	 (ID),		userName_	(userName), 
-	email_	 (email),	phoneNumber_(phoneNumber), 
-	password_(""),		chatManager_(ID_, userName)
+	:ID	 (ID),		user_name	(userName), 
+	email	 (email),	phone_number(phoneNumber), 
+	password(""),		chat_manager(ID, userName)
 {
 }
 
 void Account::setSocket(const shared_ptr<asio::ip::tcp::socket> socket)
 {
-	this->socket_ = socket;
+	this->socket = socket;
 }
 
 void Account::setPassword(const string& password)
 {
-	this->password_ = password;
+	this->password = password;
 }
 
 void Account::read()
 {
-	socket_->async_read_some(asio::buffer(buf), [&](const error_code& ec, size_t length) {
+	socket->async_read_some(asio::buffer(buf), [&](const error_code& ec, size_t length) {
 		if (ec) {
 
 		}
@@ -43,7 +43,7 @@ void Account::read()
 				read();
 			}
 			else {
-				chatManager_.readHandler(string(buf, length), socket_);
+				chat_manager.readHandler(string(buf, length), socket);
 				read();
 			}
 		}
@@ -66,7 +66,7 @@ void Account::write(const string& str)
 		return;
 	}
 	else {
-		chatManager_.writeHandler(str, this->socket_);
+		chat_manager.writeHandler(str, this->socket);
 		return;
 	}
 }
@@ -118,27 +118,27 @@ void Account::accountOperation()
 
 void Account::chatsOperation()
 {
-	Console::chatsHelp(chatManager_.getChats());
+	Console::chatsHelp(chat_manager.getChats());
 	while (true) {
 		string operation;
 		safe_getline(operation);
 		if (operation == "--make Schat" || operation == "-msc") {
-			chatManager_.makeSoloChat(this->socket_);
+			chat_manager.makeSoloChat(this->socket);
 			Console::help();
 			return;
 		}
 		else if (operation == "--make Gchat" || operation == "-mgc") {
-			chatManager_.makeGroupChat(this->socket_);
+			chat_manager.makeGroupChat(this->socket);
 			Console::help();
 			return;
 		}
 		else if (operation == "--invite user" || operation == "-iu") {
-			chatManager_.inviteUser(this->socket_);
+			chat_manager.inviteUser(this->socket);
 			Console::help();
 			return;
 		}
 		else if (operation == "--select" || operation == "-s") {
-			chatManager_.selectChat(this->socket_);
+			chat_manager.selectChat(this->socket);
 			return;
 		}
 		else if (operation == "--back") {
@@ -160,14 +160,14 @@ void Account::changeUserName()
 	safe_getline(name);
 	vector<string> command = client_command::Command::createCommand(client_command::change_name);
 	command.push_back(name);
-	this->userName_ = name;
+	this->user_name = name;
 
 	error_code ec;
 	for (auto& ex : command) {
-		this->socket_->write_some(asio::buffer(ex.data(), ex.length()), ec);
+		this->socket->write_some(asio::buffer(ex.data(), ex.length()), ec);
 		Sleep(50);
 	}
-	chatManager_.changeUrName(name);
+	chat_manager.changeUrName(name);
 	stop();
 }
 
@@ -194,7 +194,7 @@ void Account::changePassword()
 
 	error_code ec;
 	for (auto& ex : command) {
-		this->socket_->write_some(asio::buffer(ex.data(), ex.length()), ec);
+		this->socket->write_some(asio::buffer(ex.data(), ex.length()), ec);
 		Sleep(50);
 	}
 	stop();
@@ -215,7 +215,7 @@ void Account::changeEmail()
 
 	error_code ec;
 	for (auto& ex : command) {
-		this->socket_->write_some(asio::buffer(ex.data(), ex.length()), ec);
+		this->socket->write_some(asio::buffer(ex.data(), ex.length()), ec);
 		Sleep(50);
 	}
 	stop();
@@ -236,7 +236,7 @@ void Account::changePhoneNumber()
 
 	error_code ec;
 	for (auto& ex : command) {
-		this->socket_->write_some(asio::buffer(ex.data(), ex.length()), ec);
+		this->socket->write_some(asio::buffer(ex.data(), ex.length()), ec);
 		Sleep(50);
 	}
 	stop();
@@ -270,7 +270,7 @@ void Account::changeLineSize()
 #endif
 		}
 	} while (lineSize == 0);
-	chatManager_.changeLineSize(lineSize);
+	chat_manager.changeLineSize(lineSize);
 }
 
 void Account::changeSaveChatManager()
@@ -293,10 +293,10 @@ void Account::changeSaveChatManager()
 		cin >> ch;
 	}
 	if (ch == '1') {
-		this->chatManager_.changeSaveChatManager(true);
+		this->chat_manager.changeSaveChatManager(true);
 	}
 	else {
-		this->chatManager_.changeSaveChatManager(false);
+		this->chat_manager.changeSaveChatManager(false);
 	}
 }
 
@@ -323,7 +323,7 @@ void Account::exitAccount()
 		error_code ec;
 		vector<string> command = client_command::Command::createCommand(client_command::commands::exit_account);
 		for (auto& ex : command) {
-			socket_->write_some(asio::buffer(ex.data(), ex.length()), ec);
+			socket->write_some(asio::buffer(ex.data(), ex.length()), ec);
 			Sleep(50);
 		}
 		exit(0);
@@ -358,7 +358,7 @@ void Account::deleteAccount()
 		error_code ec;
 		vector<string> command = client_command::Command::createCommand(client_command::commands::delete_account);
 		for (auto& ex : command) {
-			socket_->write_some(asio::buffer(ex.data(), ex.length()), ec);
+			socket->write_some(asio::buffer(ex.data(), ex.length()), ec);
 			if (ec) {
 #if(CURRENT_LANGUAGE  == LANGUAGE_RU)
 				cout << ec.message() << "\nОшибка удаления аккаунта";
@@ -391,8 +391,8 @@ uint8_t Account::serializationLogin()
 
 	try
 	{
-		record(file, this->ID_);
-		record(file, password_);
+		record(file, this->ID);
+		record(file, password);
 	}
 	catch (const std::exception& e)
 	{

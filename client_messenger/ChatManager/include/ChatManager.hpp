@@ -34,7 +34,7 @@ struct Message
 	void serialization(ofstream& file);
 	void deserialization(ifstream& file);
 
-	string message;
+	string			 message;
 	shared_ptr<User> user;
 };
 
@@ -72,13 +72,13 @@ public:
 	void chatDeserialization	(ifstream& file, shared_ptr<User> you, map<uint64_t, shared_ptr<User>> correspondents);
 
 private:
-	bool isActiveChat_ = false;
+	bool is_active_chat = false;
 
-	size_t			lineSize_;
-	string			chatName_;
-	uint32_t		notViewedMessage_ = 0;
-	vector<Message> msgBuffer_;
-	string			chatUID_;
+	size_t			line_size;
+	string			chat_name;
+	uint32_t		not_viewed_message = 0;
+	vector<Message> msg_buffer;
+	string			chat_UID;
 };
 
 //the SoloChat class is used to manage messages between two clients
@@ -103,17 +103,17 @@ public:
 
 private:
 	void receivingMsg(const string& msg, const uint64_t ID, const string& name) {
-		if (correspondent_->ID != ID) {
+		if (correspondent->ID != ID) {
 			cout << "unknown client got into your chat" << endl;
 			abort();
 		}
-		if (correspondent_->name != name) {
-			correspondent_->name = name;
+		if (correspondent->name != name) {
+			correspondent->name = name;
 		}
-		msgBuffering(Message(msg, correspondent_));
+		msgBuffering(Message(msg, correspondent));
 	}
 private:
-	shared_ptr<User> correspondent_;
+	shared_ptr<User> correspondent;
 };
 
 //the GroupChat class is used to manage messages between multiple clients
@@ -130,8 +130,8 @@ public:
 
 private:
 	void receivingMsg(const string& msg, const uint64_t ID, const string& name) {
-		auto user = correspondents_.find(ID);
-		if (user == correspondents_.end()) {
+		auto user = correspondents.find(ID);
+		if (user == correspondents.end()) {
 			cout << "unknown client got into your chat" << endl;
 			abort();
 		}
@@ -150,7 +150,7 @@ public:
 	void deserialization(ifstream& file, shared_ptr<User> you);
 
 private:
-	map<uint64_t, shared_ptr<User>>correspondents_;
+	map<uint64_t, shared_ptr<User>>correspondents;
 };
 
 //the ChatManager class manages all user chats
@@ -161,7 +161,7 @@ public:
 	~ChatManager();
 	//getter
 public:
-	auto getChats() { return chats_; }
+	auto getChats() { return chats; }
 
 	//chat operation
 public:
@@ -202,13 +202,13 @@ public:
 
 private:
 	//settings
-	uint32_t lineSize		 = 30;
-	bool	 saveChatManager = true;
+	uint32_t line_size		 = 30;
+	bool	 save_chat_manager = true;
 
 	shared_ptr<User> you;
 
-	vector<string>				  favoriteMessages_;
-	shared_ptr<Chat>			  activeChat_;
-	map<string, shared_ptr<Chat>> chats_;
-	map<uint32_t, string>		  UIDbase_;
+	vector<string>				  favorite_messages;
+	shared_ptr<Chat>			  active_chat;
+	map<string, shared_ptr<Chat>> chats;
+	map<uint32_t, string>		  UID_base;
 };

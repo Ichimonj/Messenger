@@ -34,12 +34,12 @@ public:	//serialization
 
 private: 
 	char buf[1024];
-	shared_ptr<asio::ip::tcp::socket> socket_;
+	shared_ptr<asio::ip::tcp::socket> socket;
 
-	ChatManager chatManager_;
-	uint64_t	ID_;
-	string		userName_;
-	string		email_;
-	string		phoneNumber_;
-	string		password_;
+	ChatManager chat_manager;
+	uint64_t	ID;
+	string		user_name;
+	string		email;
+	string		phone_number;
+	string		password;
 };
