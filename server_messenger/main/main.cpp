@@ -1,7 +1,7 @@
 #include <iostream>
 #include "version.hpp" //generated
-#include "Server.hpp"
-#include "ThreadPool.hpp"
+#include "server.hpp"
+#include "thread_pool.hpp"
 using namespace std;
 
 

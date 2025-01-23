@@ -1,7 +1,8 @@
 #pragma once
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include <vector>
 using namespace std;
+
 namespace client_command {
 	//enumeration of commands
 	enum commands {

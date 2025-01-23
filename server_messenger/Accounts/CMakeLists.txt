@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 project(Accounts)
 
 set(SOURCES
-    src/AbstractAccount.cpp
-    src/TempAccount.cpp
-    src/UserAccount.cpp
+    src/abstract_account.cpp
+    src/temp_account.cpp
+    src/user_account.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

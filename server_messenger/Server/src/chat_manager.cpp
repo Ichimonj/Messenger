@@ -1,8 +1,9 @@
-#include "ChatManager.hpp"
-#include "AccountBase.hpp"
-#include "Preprocessor.hpp"
-#include "ServerError.hpp"
-#include"Rand.hpp"
+#include "chat_manager.hpp"
+#include "account_base.hpp"
+#include "preprocessor.hpp"
+#include "server_error.hpp"
+#include "rand.hpp"
+
 /*CHAT MANAGER*/
 uint8_t ChatManager::printChat(string&& msg, const shared_ptr<asio::ip::tcp::socket> socket)
 {

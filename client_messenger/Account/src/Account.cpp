@@ -1,9 +1,9 @@
-﻿#include "Account.hpp"
-#include "Lenguage.hpp"
-#include "Console.hpp"
-#include "Error.hpp"
-#include "Command.hpp"
-#include "FileWork.hpp"
+﻿#include "account.hpp"
+#include "lenguage.hpp"
+#include "console.hpp"
+#include "error.hpp"
+#include "command.hpp"
+#include "file_work.hpp"
 #include <fstream>
 
 Account::Account(const uint64_t ID, const string& userName)

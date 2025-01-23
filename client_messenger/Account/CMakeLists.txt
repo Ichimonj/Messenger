@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Account)
 
 set(SOURCES
-    src/Account.cpp
+    src/account.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

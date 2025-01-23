@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(ChatManager)
 
 set(SOURCES
-    src/ChatManager.cpp
-    src/Command.cpp
+    src/chat_manager.cpp
+    src/command.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

@@ -1,6 +1,7 @@
 #pragma once
-#include<iostream>
+#include <iostream>
 using namespace std;
+
 namespace funct_return {
 	//listing the results of functions
 	enum message

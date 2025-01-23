@@ -1,8 +1,8 @@
 project(Crypto)
 
 set(SOURCES
-    src/Hash.cpp
-    src/Rand.cpp
+    src/hash.cpp
+    src/rand.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES}) 

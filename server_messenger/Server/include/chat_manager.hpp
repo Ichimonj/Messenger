@@ -1,9 +1,9 @@
 #pragma once
 #include<iostream>
-#include"AbstractAccount.hpp"
+#include"abstract_account.hpp"
 #include"map"
 #include"asio.hpp"
-#include"Hash.hpp"
+#include"hash.hpp"
 
 class Chat;
 class SoloChat;

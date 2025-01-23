@@ -1,6 +1,6 @@
 #pragma once
-#include "ChatManager.hpp"
-#include "FileNames.hpp"
+#include "chat_manager.hpp"
+#include "file_names.hpp"
 
 class Account {
 public:

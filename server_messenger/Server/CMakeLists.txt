@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 project(Server)
 
 set(SOURCES
-    src/AccountBase.cpp
-    src/AccountFactory.cpp
-    src/Server.cpp
-    src/ChatManager.cpp
+    src/account_base.cpp
+    src/account_factory.cpp
+    src/server.cpp
+    src/chat_manager.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

@@ -1,4 +1,4 @@
-#include "FileWork.hpp"
+#include "file_work.hpp"
 
 void record(ofstream& file, uint64_t type){
     if (!file.write(reinterpret_cast<char*>(&type), sizeof(uint64_t)))

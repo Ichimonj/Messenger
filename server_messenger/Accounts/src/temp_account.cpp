@@ -1,28 +1,28 @@
-#include "UserAccount.hpp"
-#include "ServerError.hpp"
-#include "ThreadPool.hpp"
-//constructors
-UserAccount::UserAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string &userName, const string &password, const string &emale, const PhoneNumber &phoneNumber)
-    : Account(socket, ID, userName, password), email(emale), phone_number(phoneNumber)
-{
-    acDEBUG_LOG("DEBUG_User_account", "UserAccount(const uint64_t ID, const string& userName, const string& password, const string& emale, const PhoneNumber& phoneNumber)");
-    reading();
-}
-UserAccount::UserAccount(UserAccount &&other) noexcept
-    : Account(move(other)), email(move(email)), phone_number(move(phone_number))
-{
-    acDEBUG_LOG("DEBUG_User_account", "UserAccount(UserAccount&& other)");
-    reading();
-}
+#include "temp_account.hpp"
+#include "server_error.hpp"
+#include "thread_pool.hpp"
 
-//destructors
-UserAccount::~UserAccount()
+//constructors
+TempAccount::TempAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string& userName, const string& password)
+    : Account(socket, ID, userName, password)
 {
-    acDEBUG_LOG("DEBUG_User_account", "~UserAccount()");
+    acDEBUG_LOG("DEBUG_Temp_account", "TempAccount(const uint64_t ID, const string userName)");
+    reading();
+}
+TempAccount::TempAccount(TempAccount &&other) noexcept
+    : Account(move(other))
+{
+    acDEBUG_LOG("DEBUG_Temp_account", "Account(Account&& other)");
+    reading();
+}
+//destructors
+TempAccount::~TempAccount()
+{
+    acDEBUG_LOG("DEBUG_Temp_account", "~TempAccount()");
 }
 
 //other member functions
-void UserAccount::reading()
+void TempAccount::reading()
 {
     socket->async_read_some(asio::buffer(buf),
         [&](const error_code& ec, size_t length)
@@ -31,14 +31,14 @@ void UserAccount::reading()
                 threadPool->addTask([&]() {read_handler(buf, length); });
             }
             else {
-                ERROR_LOG("ERROR_User_account", "error reading");
-                socket->close();
-                this->status = offline;
-                return;
+                ERROR_LOG("ERROR_Temp_account", "error reading");
+                this->status = deleted;
+                AccountFactory::free_id.push_back(this->getId());
+                account_base.erase(this->getId());
             }
         });
 }
-void UserAccount::read_handler(const char* buf, const size_t length)
+void TempAccount::read_handler(const char* buf, const size_t length)
 {
     string msg(buf, length);
     USER_MESSAGE(this->getUserName(), msg);
@@ -61,16 +61,6 @@ void UserAccount::read_handler(const char* buf, const size_t length)
         //Change password
         else if (msg == "__chPaswd") {
             change_password(ec);
-            return;
-        }
-        //Change emale
-        else if (msg == "__chEmail") {
-            change_email(ec);
-            return;
-        }
-        //Change phone number
-        else if (msg == "__chPhoneNumber") {
-            change_phone_number(ec);
             return;
         }
         //exit
@@ -138,19 +128,18 @@ void UserAccount::read_handler(const char* buf, const size_t length)
         reading();
     }
 }
-
-bool UserAccount::checkError(const error_code& ec)
+bool TempAccount::checkError(const error_code& ec)
 {
     if (ec) {
-        ERROR_LOG("ERROR_User_account", "error reading");
-        this->socket->close();
-        this->status = offline;
+        ERROR_LOG("ERROR_Temp_account", "error reading");
+        this->status = deleted;
+        AccountFactory::free_id.push_back(this->getId());
+        account_base.erase(this->getId());
         return true;
     }
     return false;
 }
-
-void UserAccount::change_name(error_code& ec)
+void TempAccount::change_name(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -162,7 +151,7 @@ void UserAccount::change_name(error_code& ec)
     reading();
     return;
 }
-void UserAccount::change_password(error_code& ec)
+void TempAccount::change_password(error_code& ec)
 {
     char buf[1024];
     //old password
@@ -192,44 +181,7 @@ void UserAccount::change_password(error_code& ec)
         return;
     }
 }
-void UserAccount::change_email(error_code& ec)
-{
-    char buf[1024];
-    size_t length = socket->read_some(asio::buffer(buf), ec);
-    if (checkError(ec)) return;
-
-    string msg = string(buf, length);
-    this->email = msg;
-
-    reading();
-    return;
-}
-void UserAccount::change_phone_number(error_code& ec)
-{
-    char buf[1024];
-    size_t length = socket->read_some(asio::buffer(buf), ec);
-    if (checkError(ec)) return;
-
-    PhoneNumber phoneNumber(string(buf, length));
-    if (phoneNumber.isValid()) {
-        acDEBUG_LOG("DEBUG_User_account", "Phone number valid");
-
-        this->phone_number = phoneNumber;
-        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
-        if (checkError(ec)) return;
-
-    }
-    else {
-        acDEBUG_LOG("DEBUG_User_account", "Phone number not valid");
-
-        socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::wrongPhoneNumber) }), ec);
-        if (checkError(ec)) return;
-
-    }
-    reading();
-    return;
-}
-void UserAccount::exit_account(error_code& ec)
+void TempAccount::exit_account(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -246,7 +198,7 @@ void UserAccount::exit_account(error_code& ec)
     reading();
     return;
 }
-void UserAccount::delete_account(error_code& ec)
+void TempAccount::delete_account(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -264,7 +216,7 @@ void UserAccount::delete_account(error_code& ec)
     return;
 }
 
-void UserAccount::create_solo_chat(error_code& ec)
+void TempAccount::create_solo_chat(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -286,7 +238,7 @@ void UserAccount::create_solo_chat(error_code& ec)
     reading();
     return;
 }
-void UserAccount::add_solo_chat(error_code& ec)
+void TempAccount::add_solo_chat(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -321,7 +273,7 @@ void UserAccount::add_solo_chat(error_code& ec)
     reading();
     return;
 }
-void UserAccount::create_group_chat(error_code& ec)
+void TempAccount::create_group_chat(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -344,7 +296,7 @@ void UserAccount::create_group_chat(error_code& ec)
     reading();
     return;
 }
-void UserAccount::add_group_chat(error_code& ec)
+void TempAccount::add_group_chat(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -382,7 +334,7 @@ void UserAccount::add_group_chat(error_code& ec)
     reading();
     return;
 }
-void UserAccount::invite_user(error_code& ec)
+void TempAccount::invite_user(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -416,7 +368,7 @@ void UserAccount::invite_user(error_code& ec)
     reading();
     return;
 }
-void UserAccount::add_user_group_chat(error_code& ec)
+void TempAccount::add_user_group_chat(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -450,7 +402,7 @@ void UserAccount::add_user_group_chat(error_code& ec)
     reading();
     return;
 }
-void UserAccount::select_chat(error_code& ec)
+void TempAccount::select_chat(error_code& ec)
 {
     char buf[1024];
     size_t length = socket->read_some(asio::buffer(buf), ec);
@@ -478,43 +430,30 @@ void UserAccount::select_chat(error_code& ec)
     return;
 }
 
-void UserAccount::print() const
+void TempAccount::print() const
 {
-    cout << "\033[38;5;250;48;5;23m____User account____\n";
+    cout << "\033[38;5;250;48;5;23m____Temp account____\n";
     cout << dynamic_cast<const Account &>(*this);
     cout << *this;
 }
-
-void UserAccount::info() const
+void TempAccount::info() const
 {
-    cout << "\033[38;5;250;48;5;23m____User account____\n";
+    cout << "\033[38;5;250;48;5;23m____Temp account____\n";
     Account::info();
 }
+//The temporary account will be deleted after logging out, there is no need to archive messages
+void TempAccount::bufferingMsg(const string& msg){ }
+void TempAccount::outBuffer(){ }
 
-void UserAccount::bufferingMsg(const string& msg)
+const string TempAccount::getAccountData() const
 {
-    this->chat_manager.bufferingMsg(msg);
+    return dynamic_cast<const Account&>(*this).getAccountData();
 }
 
-void UserAccount::outBuffer()
-{
-    for (auto& ex : chat_manager.getBuffer()) {
-        this->socket->write_some(asio::buffer(ex.data(), ex.length()));
-    }
-}
-
-const string UserAccount::getAccountData() const
-{
-    string data = Account::getAccountData();
-    data += this->email + '\n' + this->phone_number.getNumber();
-    return data;
-}
 
 //operators
-ostream &operator<<(ostream &os, const UserAccount &ex)
+ostream &operator<<(ostream &os, const TempAccount &ex)
 {
-    os << setw(16) << left << setfill('.') << "Emale" << ex.email << '\n';
-    os << setw(16) << left << setfill('.') << "Phone number" << ex.phone_number;
-    os << "\033[0m\n";
+    os << "\033[0m";
     return os;
 }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(PhoneNumber)
 
-add_library(${PROJECT_NAME} src/PhoneNumber.cpp)
+add_library(${PROJECT_NAME} src/phone_number.cpp)
 add_library(sub::PhoneNumber ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME}

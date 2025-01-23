@@ -1,7 +1,8 @@
 #pragma once
 #include <iostream>
-#include "ChatManager.hpp"
+#include "chat_manager.hpp"
 using namespace std;
+
 //aligned console output
 void print(const char* first, const char* second, size_t FILL);
 void print(const string& first, const string& second, size_t FILL);

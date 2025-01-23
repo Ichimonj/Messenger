@@ -1,8 +1,8 @@
 #pragma once
-#include "AbstractAccount.hpp"
-#include "AccountFactory.hpp"
-#include "AccountBase.hpp"
-#include "ChatManager.hpp"
+#include "abstract_account.hpp"
+#include "account_factory.hpp"
+#include "account_base.hpp"
+#include "chat_manager.hpp"
 
 // temporary account
 class TempAccount : public Account

@@ -1,8 +1,9 @@
 #pragma once
-#include"Accounts.hpp"
-#include"AccountBase.hpp"
+#include"accounts.hpp"
+#include"account_base.hpp"
 #include"atomic"
-#include"Hash.hpp"
+#include"hash.hpp"
+
 //factory design pattern
 //CLASS RESPONSIBLE FOR CREATION OF ACCOUNTS
 class AccountFactory

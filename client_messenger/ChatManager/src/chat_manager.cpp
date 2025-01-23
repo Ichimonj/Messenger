@@ -1,10 +1,10 @@
-#include "ChatManager.hpp"
-#include "Lenguage.hpp"
-#include "Console.hpp"
-#include "FileWork.hpp"
-#include "FileNames.hpp"
-#include "Error.hpp"
-#include "Command.hpp"
+#include "chat_manager.hpp"
+#include "lenguage.hpp"
+#include "console.hpp"
+#include "file_work.hpp"
+#include "file_names.hpp"
+#include "error.hpp"
+#include "command.hpp"
 #include <iomanip>
 
 bool isDigit(string& str)

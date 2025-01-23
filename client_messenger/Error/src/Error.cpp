@@ -1,5 +1,6 @@
-#include"Error.hpp"
-#include"Lenguage.hpp"
+#include "error.hpp"
+#include "lenguage.hpp"
+
 string funct_return::Error::message(funct_return::message msg)
 {
 #if (CURRENT_LANGUAGE == LANGUAGE_RU)

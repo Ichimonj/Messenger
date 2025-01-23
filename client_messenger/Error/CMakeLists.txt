@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Error)
 
 set(SOURCES
-    src/Error.cpp
+    src/error.cpp
 )
 
 add_library(${PROJECT_NAME} ${SOURCES})

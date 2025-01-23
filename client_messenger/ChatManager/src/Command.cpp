@@ -1,4 +1,5 @@
-#include"Command.hpp"
+#include"command.hpp"
+
 std::vector<std::string> client_command::Command::createCommand(client_command::commands command)
 {
     switch (command)

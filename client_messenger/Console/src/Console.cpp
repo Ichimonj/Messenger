@@ -1,6 +1,6 @@
-#include "Console.hpp"
+#include "console.hpp"
 #include <iomanip>
-#include "Lenguage.hpp"
+#include "lenguage.hpp"
 #include "string"
 
 void print(const char* first, const char* second, size_t FILL)

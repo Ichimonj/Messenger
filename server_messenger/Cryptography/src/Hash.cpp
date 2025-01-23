@@ -1,4 +1,4 @@
-#include"Hash.hpp"
+#include "hash.hpp"
 
 string Hash(string& str)
 {

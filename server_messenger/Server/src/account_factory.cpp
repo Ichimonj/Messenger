@@ -1,5 +1,6 @@
-#include "AccountFactory.hpp"
-#include "ServerError.hpp"
+#include "account_factory.hpp"
+#include "server_error.hpp"
+
 //important: version without encryption
 atomic<uint64_t> AccountFactory::count = 0;
 vector<uint64_t> AccountFactory::free_id{};

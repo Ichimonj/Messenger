@@ -1,6 +1,7 @@
 #pragma once
 #include "map"
-#include "AbstractAccount.hpp"
+#include "abstract_account.hpp"
+
 typedef shared_ptr<Account> userPtr;
 typedef map<uint64_t, userPtr> userSet;
 

@@ -1,9 +1,8 @@
 #pragma once
-#include<iostream>
-#include<map>
-#include<vector>
-#include"asio.hpp"
-
+#include <iostream>
+#include <map>
+#include <vector>
+#include "asio.hpp"
 using namespace std;
 
 bool isDigit(string& str);

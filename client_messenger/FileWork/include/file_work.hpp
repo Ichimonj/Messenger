@@ -1,7 +1,8 @@
 #pragma once
-#include<iostream>
-#include<fstream>
+#include <iostream>
+#include <fstream>
 using namespace std;
+
 /*write to file*/
 void record(ofstream& file, uint64_t type);
 void record(ofstream& file, string& type);

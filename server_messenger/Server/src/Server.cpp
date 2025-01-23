@@ -1,6 +1,7 @@
-#include "Server.hpp"
-#include "AccountBase.hpp"
-#include "ThreadPool.hpp"
+#include "server.hpp"
+#include "account_base.hpp"
+#include "thread_pool.hpp"
+
 Server::Server(shared_ptr<asio::io_context> context, const char* ip, int port) : context(context)
 {
     svDEBUG_LOG("DEBUG_Server", "Server(shared_ptr<asio::io_context> context)");

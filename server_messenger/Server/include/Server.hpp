@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
 #include "asio.hpp"
-#include "AccountFactory.hpp"
-#include "AccountBase.hpp"
+#include "account_factory.hpp"
+#include "account_base.hpp"
 using namespace std;
 
 //CLASS RESPONSIBLE FOR CONNECTING CLIENTS
