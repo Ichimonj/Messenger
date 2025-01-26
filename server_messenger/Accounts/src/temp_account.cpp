@@ -9,12 +9,7 @@ TempAccount::TempAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_
     acDEBUG_LOG("DEBUG_Temp_account", "TempAccount(const uint64_t ID, const string userName)");
     reading();
 }
-TempAccount::TempAccount(TempAccount &&other) noexcept
-    : Account(move(other))
-{
-    acDEBUG_LOG("DEBUG_Temp_account", "Account(Account&& other)");
-    reading();
-}
+
 //destructors
 TempAccount::~TempAccount()
 {

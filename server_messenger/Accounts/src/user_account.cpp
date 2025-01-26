@@ -9,12 +9,6 @@ UserAccount::UserAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_
     acDEBUG_LOG("DEBUG_User_account", "UserAccount(const uint64_t ID, const string& userName, const string& password, const string& emale, const PhoneNumber& phoneNumber)");
     reading();
 }
-UserAccount::UserAccount(UserAccount &&other) noexcept
-    : Account(move(other)), email(move(email)), phone_number(move(phone_number))
-{
-    acDEBUG_LOG("DEBUG_User_account", "UserAccount(UserAccount&& other)");
-    reading();
-}
 
 //destructors
 UserAccount::~UserAccount()

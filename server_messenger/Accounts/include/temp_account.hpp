@@ -12,7 +12,6 @@ public:
 	TempAccount(const TempAccount &) = delete;
 
 	TempAccount(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string& userName, const string& password);
-	TempAccount(TempAccount &&other) noexcept;
 
 	~TempAccount();
 	

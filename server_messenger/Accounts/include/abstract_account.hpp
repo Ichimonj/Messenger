@@ -22,7 +22,6 @@ public:
 	Account(const Account &) 	= delete;
 
 	Account(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, const string& userName, const string& password);
-	Account(Account &&other) noexcept;
 
 	virtual ~Account();
 

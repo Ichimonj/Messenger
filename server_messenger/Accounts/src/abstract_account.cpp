@@ -6,11 +6,7 @@ Account::Account(shared_ptr<asio::ip::tcp::socket> socket, const uint64_t ID, co
 {
     acDEBUG_LOG("DEBUG_Virtual_account", "Account(const uint64_t ID, const string userName)");
 }
-Account::Account(Account &&other) noexcept
-    : socket(move(other.socket)), ID(other.ID), user_name(move(other.user_name)),password(move(other.password)), status(other.status)
-{
-    acDEBUG_LOG("DEBUG_Virtual_account", "Account(Account&& other)");
-}
+
 //destructors
 Account::~Account()
 {
