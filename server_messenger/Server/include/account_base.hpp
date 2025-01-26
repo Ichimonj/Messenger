@@ -12,8 +12,8 @@ public:
     AccountBase();
     ~AccountBase();
 
-    void    insert(userPtr&& user);
-    void    erase(uint64_t ID);
+    void    insert  (userPtr&& user);
+    void    erase   (uint64_t ID);
     userPtr findUser(uint64_t ID);
 
     void    print();

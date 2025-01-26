@@ -21,9 +21,9 @@ public:
 public:
     void     setNumber(string phoneNumber);
 
-    string   getNumber()const;
-    uint16_t getCountryCode()const;
-    uint16_t getOperatorCode()const;
+    string   getNumber()          const;
+    uint16_t getCountryCode()     const;
+    uint16_t getOperatorCode()    const;
     uint32_t getSubscriberNumber()const;
 
     const bool isValid() const;

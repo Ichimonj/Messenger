@@ -14,10 +14,10 @@ public:
 	ChatManager() {};
 	~ChatManager() {};
 
-	uint8_t printChat		(string&& msg, shared_ptr<asio::ip::tcp::socket> socket);
-	uint8_t setChatIndex	(const string& chatUID);
-	uint8_t createSoloChat	(const uint64_t ID, const shared_ptr<Account> creator);
-	uint8_t createGroupChat	(const uint64_t ID, const shared_ptr<Account> creator);
+	uint8_t printChat			(string&& msg, shared_ptr<asio::ip::tcp::socket> socket);
+	uint8_t setChatIndex		(const string& chatUID);
+	uint8_t createSoloChat		(const uint64_t ID, const shared_ptr<Account> creator);
+	uint8_t createGroupChat		(const uint64_t ID, const shared_ptr<Account> creator);
 	uint8_t inviteUserGroupChat	(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator);
 	uint8_t addUserGroupChat	(const uint64_t ID, const string& chatUID, const shared_ptr<Account> creator);
 
@@ -43,9 +43,9 @@ public:
 public:
 	virtual void		 printChat		 (const string&& msg, const shared_ptr<asio::ip::tcp::socket> socket) = 0;
 	//chatType(0 - soloChat, 1-groupChat)
-	virtual void		 generateUID	 (const uint64_t userID) = 0;
+	virtual void		 generateUID	 (const uint64_t userID)		  = 0;
 	virtual uint8_t		 addUserGroupChat(const shared_ptr<Account> user) = 0;
-	virtual const size_t getCountUser() const = 0;
+	virtual const size_t getCountUser()   const = 0;
 	string chat_UID;
 private:
 };

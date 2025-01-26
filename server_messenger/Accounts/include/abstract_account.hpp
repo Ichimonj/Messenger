@@ -34,11 +34,11 @@ public:
 	virtual const string getAccountData() const;
 	const shared_ptr<asio::ip::tcp::socket>	getSocket()	const;
 
-	virtual void reading() 	= 0;
-	virtual void print() 	const;
-	virtual void info() 	const;
+	virtual void reading() 	  = 0;
+	virtual void print() 	  const;
+	virtual void info() 	  const;
 	virtual void bufferingMsg(const string& msg) = 0;
-	virtual void outBuffer() = 0;
+	virtual void outBuffer()  = 0;
 
 
 	uint8_t login(shared_ptr<asio::ip::tcp::socket> socket);
@@ -50,8 +50,9 @@ protected:
 	char buf[1024];
 
 	shared_ptr<asio::ip::tcp::socket> socket;
+
 	const uint64_t 	ID;
 	string 			user_name = "NULL";
-	string			password = "NULL";
+	string			password  = "NULL";
 	status 			status	  = online;
 };

@@ -16,9 +16,9 @@ public:
 	~UserAccount();
 
 public:
-	void reading() 	override;
-	void print() 	const override;
-	void info() 	const override;
+	void reading() 	 override;
+	void print() 	 const override;
+	void info() 	 const override;
 	void bufferingMsg(const string& msg)override;
 	void outBuffer()					override;
 
