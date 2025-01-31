@@ -57,13 +57,13 @@ int main(int argc,char* argv[])
 
 
     Server server(context,ip,port);
-    server.start_accept();
+    server.start_accept();  //Подключение клиентов 
 
     vector<thread> threads;
     for (size_t i = 0; i < IOthreadSize; i++) {
-        threads.push_back(thread([context]() {context->run(); }));
+        threads.push_back(thread([context]() {context->run(); }));  // Запуск записи/чтения
     }
-    threadPool = make_shared<ThreadPool>(threadPoolThreadsSize);
+    threadPool = make_shared<ThreadPool>(threadPoolThreadsSize); // Запуск выполнения очереди задачь
 
     for (;;) {
         string command;

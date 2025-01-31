@@ -17,20 +17,24 @@ void Server::start_accept()
 {
     svDEBUG_LOG("DEBUG_Server", "Starting to accept connections...");
 
+    // Сокет клиента
     auto socket = make_shared<asio::ip::tcp::socket>(*context);
 
+    // Подключение клиента
     acceptor->async_accept(*socket, [this, socket](const error_code& ec)
         {
             if (!ec)
             {
                 svDEBUG_LOG("DEBUG_Server", "New client connected!");
+                // При успешном подключении добавляем клиента в базу
                 threadPool->addTask([this, socket]() {add_client(socket); });
             }
             else
             {
                 ERROR_LOG("Accept error: ", ec.message());   
             }
-            start_accept();
+            // Возвращаем подключение
+            start_accept(); 
         });
 }
 void Server::add_client(shared_ptr<asio::ip::tcp::socket> socket)

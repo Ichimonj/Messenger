@@ -26,7 +26,7 @@ public:
 
 private:
 	void read_handler(const char* buf, const size_t length);
-	bool checkError(const error_code& ec);
+	bool checkError  (const error_code& ec);
 
 	void change_name		(error_code& ec);
 	void change_password	(error_code& ec);

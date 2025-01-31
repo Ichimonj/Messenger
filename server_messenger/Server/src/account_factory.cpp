@@ -46,6 +46,7 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
 
+    // Создаем ID клиенту
     uint64_t ID;
     mt_assignment_id.lock();
     if (free_id.empty()) { ID = count++; }
@@ -56,7 +57,7 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     mt_assignment_id.unlock();
 
     mt_account_insert.lock();
-    account_base.insert(make_shared<TempAccount>(socket, ID, _userName,_password));
+    account_base.insert(make_shared<TempAccount>(socket, ID, _userName,_password)); // Добавляем нового клиента в базу
     mt_account_insert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation temp account ID - "+to_string(ID)));
@@ -106,9 +107,11 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
 
         _phoneNumber.setNumber(string(buf, length));
     }
+
     socket->write_some(asio::buffer({ static_cast<unsigned char>(funct_return::message::successful) }), ec);
     if (ec) { EXCEPTIONS_LOG("Account_factory", ec.message()); return; }
 
+    // Создаем ID клиенту
     uint64_t ID;
     mt_assignment_id.lock();
     if (free_id.empty()) { ID = count++; }
@@ -119,11 +122,11 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
     mt_assignment_id.unlock();
 
     mt_account_insert.lock();
-    account_base.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _email, _phoneNumber));
+    account_base.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _email, _phoneNumber)); // Добавляем нового клиента в базу
     mt_account_insert.unlock();
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation user account ID - " + to_string(ID)));
-    string accountData = to_string(ID) + '\n' + _userName + '\n' + _email + '\n' + _phoneNumber.getNumber();
+    string accountData = to_string(ID) + '\n' + _userName + '\n' + _email + '\n' + _phoneNumber.getNumber(); 
     socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec);
 }
 
