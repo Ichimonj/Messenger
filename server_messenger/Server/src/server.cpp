@@ -40,5 +40,5 @@ void Server::start_accept()
 void Server::add_client(shared_ptr<asio::ip::tcp::socket> socket)
 {
     svDEBUG_LOG("DEBUG_Server", "add_client(shared_ptr<asio::ip::tcp::socket> socket)");
-    AccountFactory::make_account(socket);
+    AccountFactory::make_account(socket); // Создание аккаунта для клиента
 }

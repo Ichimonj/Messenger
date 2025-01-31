@@ -62,7 +62,7 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation temp account ID - "+to_string(ID)));
     string accountData = to_string(ID) + '\n' + _userName;
-    socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec);
+    socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec); // Отправляем клиенту его данные 
 }
 
 //Accounts/include/UserAccount.hpp
@@ -127,7 +127,7 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation user account ID - " + to_string(ID)));
     string accountData = to_string(ID) + '\n' + _userName + '\n' + _email + '\n' + _phoneNumber.getNumber(); 
-    socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec);
+    socket->write_some(asio::buffer(accountData.data(), accountData.size()), ec); // Отправляе клиенту его данные
 }
 
 void AccountFactory::login_account(shared_ptr<asio::ip::tcp::socket> socket, error_code& ec)
