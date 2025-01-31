@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
-project(server VERSION 0.19.2)
+set(CMAKE_CXX_STANDARD 17)
+project(server VERSION 0.19.3)
 
 set(project_version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 configure_file(

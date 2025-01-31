@@ -2,11 +2,13 @@
 #include "version.hpp" //generated
 #include "server.hpp"
 #include "thread_pool.hpp"
+#include "data_base_work.hpp"
 using namespace std;
 
 
 int main(int argc,char* argv[])
 {
+
     setlocale(LC_ALL, "ru");
     cout << "BUILD VERSION - " << version << endl;
 
@@ -55,10 +57,11 @@ int main(int argc,char* argv[])
     cout << initInform << endl;
 #endif // _DEBUG
 
+    WorkWithFiles::initAllDir();
 
     Server server(context,ip,port);
     server.start_accept();  //Подключение клиентов 
-
+    
     vector<thread> threads;
     for (size_t i = 0; i < IOthreadSize; i++) {
         threads.push_back(thread([context]() {context->run(); }));  // Запуск записи/чтения

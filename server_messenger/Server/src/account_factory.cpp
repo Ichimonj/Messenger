@@ -1,5 +1,6 @@
 #include "account_factory.hpp"
 #include "server_error.hpp"
+#include "data_base_work.hpp"
 
 //important: version without encryption
 atomic<uint64_t> AccountFactory::count = 0;
@@ -59,6 +60,8 @@ void AccountFactory::make_temp_account(shared_ptr<asio::ip::tcp::socket> socket,
     mt_account_insert.lock();
     account_base.insert(make_shared<TempAccount>(socket, ID, _userName,_password)); // Добавляем нового клиента в базу
     mt_account_insert.unlock();
+
+    WorkWithFiles::createUserDir(ID); //создаем папку для клиента 
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation temp account ID - "+to_string(ID)));
     string accountData = to_string(ID) + '\n' + _userName;
@@ -124,6 +127,8 @@ void AccountFactory::make_user_account(shared_ptr<asio::ip::tcp::socket> socket,
     mt_account_insert.lock();
     account_base.insert(make_shared<UserAccount>(socket, ID, _userName, _password, _email, _phoneNumber)); // Добавляем нового клиента в базу
     mt_account_insert.unlock();
+
+    WorkWithFiles::createUserDir(ID); //создаем папку для клиента 
 
     afDEBUG_LOG("DEBUG_account_factory", string("successful creation user account ID - " + to_string(ID)));
     string accountData = to_string(ID) + '\n' + _userName + '\n' + _email + '\n' + _phoneNumber.getNumber(); 
