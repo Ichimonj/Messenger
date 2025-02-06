@@ -19,7 +19,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/../Console/include
     PUBLIC ${PROJECT_SOURCE_DIR}/../Error/include
     PUBLIC ${PROJECT_SOURCE_DIR}/../FileWork/include
-    PUBLIC D:/vs/newlibs/asio-1.18.0/include
+    PUBLIC ${BOOST_ASIO_INCLUDE}
 )
 install(TARGETS ${PROJECT_NAME}
     DESTINATION ${PROJECT_SOURCE_DIR}/../lib

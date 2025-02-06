@@ -23,7 +23,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/../Preprocessor
     PUBLIC ${PROJECT_SOURCE_DIR}/../Cryptography/include
     PUBLIC ${PROJECT_SOURCE_DIR}/../ThreadPool/include
-    PUBLIC D:/vs/newlibs/asio-1.18.0/include
+    PUBLIC ${BOOST_ASIO_INCLUDE}
 )
 
 install(TARGETS ${PROJECT_NAME}

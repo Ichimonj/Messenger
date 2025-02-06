@@ -6,6 +6,15 @@
 ```client_messenger/``` 
 
 # Установка
+## Установка библиотек
+В файлах `CMakeLists.txt`
+нужно аменить пути в
+```cmake
+set(BOOST_ASIO_INCLUDE "PATH/TO/asio/include")
+set(OPEN_SSP_INCLUDE "PATH/TO/openssl64a/include")
+set(OPEN_SSP_LIB "PATH/TO/openssl64a/lib")
+```
+на соотвествующие пути.
 ## Установка серверной части
 ```bash
 cd server_messenger

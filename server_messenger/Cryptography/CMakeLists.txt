@@ -10,9 +10,9 @@ add_library(sub::Crypto ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE ${PROJECT_SOURCE_DIR}/include
-    PUBLIC D:/vs/newlibs/openssl64a/include
+    PUBLIC ${OPEN_SSP_INCLUDE}
 )
-target_link_directories(${PROJECT_NAME} PUBLIC D:/vs/newlibs/openssl64a/lib)
+target_link_directories(${PROJECT_NAME} PUBLIC ${OPEN_SSP_LIB})
 target_link_libraries(${PROJECT_NAME} libcrypto.lib libssl.lib)
 
 install(TARGETS ${PROJECT_NAME}
